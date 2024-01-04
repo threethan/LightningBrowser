@@ -292,7 +292,11 @@ public class BrowserService extends Service {
     public static void bind(Activity activity, ServiceConnection connection, boolean needed){
         Intent intent = new Intent(activity, BrowserService.class);
         if (amRunning(activity)) {
-            activity.bindService(intent, connection, BIND_FLAGS);
+            try {
+                activity.bindService(intent, connection, BIND_FLAGS);
+            } catch (SecurityException ignored) {
+                activity.bindService(intent, connection, BIND_ABOVE_CLIENT | BIND_IMPORTANT);
+            }
         } else if (needed) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 activity.startForegroundService(intent);
