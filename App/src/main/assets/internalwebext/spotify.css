@@ -1,0 +1,23 @@
+/* Hide install nag buttons */
+body.mobile-web-player #main div div div div div div a:last-child:nth-child(4) {
+    display:none;
+}
+/*body.mobile-web-player #main div div div div div a:nth-child(3):nth-last-child(2) {
+    display:none;
+}*/
+/* Shrink Bottom Bar */
+div.hK_6CFpJG8JDPkxhQT41 {
+    background: linear-gradient(0deg,#000F 40%,#0000);
+}
+div.SCWjjsH9LU7fB7dh7ckH {
+    height: 40px !important;
+    margin-left: 35%;
+    margin-right: 35%;
+}
+div.PBG1TYHEQHdEoTb7wkcG a span {
+    display:none !important;
+}
+/* Hide library nag */
+#tippy-1, #tippy-2, #tippy-3 {
+    display: none !important;
+}

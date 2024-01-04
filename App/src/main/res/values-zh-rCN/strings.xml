@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_group">添加分组</string>
+    <string name="delete_group">删除分组</string>
+    <string name="edit_group">编辑分组</string>
+    <string name="app_details">应用详情</string>
+    <string name="apps_hidden">- 隐藏</string>
+
+    <string name="bookmarks_title">芸签列表</string>
+    <string name="tabs_title">选项卡列表</string>
+    <string name="tabs_info">活动选项卡可以在后台播放和录制音频</string>
+
+    <!--  Tooltips  -->
+    <string name="tip_kill_process">停止后台运行</string>
+    <string name="tip_launch_out">在应用自身窗口启动一次</string>
+
+    <string name="tip_info_website">关于添加网站</string>
+
+    <string name="tip_stop_editing">关闭编辑模式</string>
+    <string name="tip_select_all">选择/反选所有可见的应用</string>
+
+    <string name="tip_uninstall">卸载 / 删除</string>
+    <string name="tip_uninstall_bulk">卸载 / 删除所有选中内容</string>
+    <string name="tip_info">安卓应用信息</string>
+    <string name="tip_change_icon">更换图标</string>
+
+    <string name="tip_save_settings">备份全部设置和分组</string>
+    <string name="tip_load_settings">恢复所有设置和分组</string>
+
+    <string name="tip_hide">隐藏该应用</string>
+    <string name="tip_show">取消隐藏</string>
+
+    <!--  Toasts  -->
+    <string name="moved_hidden">移动到</string>
+    <string name="moved_hidden_bold">隐藏分组</string>
+    <string name="moved_shown">移动到</string>
+    <string name="refreshed_icon">刷新图标.....</string>
+
+    <string name="notification_title_n">Lightning Browser: 没有网站在运行</string>
+    <string name="notification_title_s">Lightning Browser: 一个网站正在运行</string>
+    <string name="notification_title_p">Lightning Browser: %1$d 个网站正在运行</string>
+    <string name="notification_content">这条通知可以确保网站背景音频顺利运行</string>
+
+    <string name="addons_install">安装</string>
+    <string name="addons_update">更新</string>
+    <string name="addons_activate">激活</string>
+    <string name="addons_uninstall">移除</string>
+
+    <!--  Browser Tooltips  -->
+    <string name="web_back">后退</string>
+    <string name="web_forward">前进</string>
+    <string name="web_reload">刷新页面</string>
+    <string name="web_exit">退出选项卡</string>
+    <string name="web_add_bookmark">将页面添加到芸签</string>
+    <string name="web_remove_bookmark">从标签中删除芸签</string>
+    <string name="web_cancel">关闭</string>
+    <string name="web_confirm">确认并启动</string>
+
+    <!-- Browser -->
+    <string name="web_download_started">下载中</string>
+    <string name="web_download_finished">下载完成</string>
+
+    <string name="web_apk_prompt_title">安装包已下载</string>
+    <string name="web_apk_prompt_message_pre">已下载 %1$s</string>
+    <string name="web_apk_prompt_message">您想安装它还是将它保存到您的下载文件夹？\n\n    \n注意，该文件来自互联网上，可能存在风险！</string>
+    <string name="web_apk_prompt_install">安装</string>
+    <string name="web_apk_prompt_move">保存</string>
+    <string name="web_apk_prompt_delete">删除</string>
+    <string name="extension_prompt_title">管理 Web 拓展程序</string>
+    <string name="extension_prompt_hint">从 Firefox Addons 获取扩展</string>
+
+    <string name="web_search">搜索或输入网址</string>
+
+    <!-- Misc. -->
+    <string name="warning">重要信息</string>
+    <string name="cancel">关闭</string>
+    <string name="understood">了解!</string>
+    <string name="confirm">确认</string>
+    <string name="next">继续</string>
+
+    <!-- Gecko -->
+    <string name="before_unload_message">本页面要求您确认是否要离开 - 您输入的数据可能不会被保存</string>
+    <string name="before_unload_title">确认?</string>
+    <string name="before_unload_leave_page">离开页面</string>
+    <string name="before_unload_stay">留在页面</string>
+
+    <string name="repost_confirm_message">要显示该页面，GeckoViewExample 必须发送信息，重复之前执行的任何操作（如搜索或订单确认）。</string>
+    <string name="repost_confirm_title">确认?</string>
+    <string name="repost_confirm_resend">重新发送</string>
+    <string name="repost_confirm_cancel">关闭</string>
+
+    <string name="username">用户名</string>
+    <string name="password">密码</string>
+    <string name="clear_field">清空</string>
+
+    <string name="wait">等待</string>
+    <string name="stop">停止</string>
+    <string name="web_close">出口</string>
+</resources>

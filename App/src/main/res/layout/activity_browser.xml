@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.threethan.browser.browser.CursorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:descendantFocusability="afterDescendants"
+        android:focusable="false"
+        android:layerType="hardware"
+        android:orientation="horizontal"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp">
+
+        <ImageButton
+            android:id="@+id/back"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_back"
+            android:tooltipText="@string/web_back"
+            android:visibility="gone"
+            tools:ignore="UnusedAttribute"
+            tools:visibility="visible" />
+
+        <ImageButton
+            android:id="@+id/forward"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_forward"
+            android:tooltipText="@string/web_forward"
+            android:visibility="gone"
+            tools:ignore="UnusedAttribute"
+            tools:visibility="visible" />
+
+        <ImageButton
+            android:id="@+id/refresh"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_refresh"
+            android:tooltipText="@string/web_reload"
+            tools:ignore="UnusedAttribute" />
+
+        <LinearLayout
+            android:id="@+id/urlLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:paddingEnd="0dp"
+            tools:ignore="RtlSymmetry,UselessParent">
+
+            <ImageView
+                android:id="@+id/favicon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/bkg_favicon"
+                android:src="@drawable/web_no_favicon" />
+
+            <TextView
+                android:id="@+id/urlPre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="2sp"
+                android:alpha="0.7"
+                android:singleLine="true"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                tools:text="www." />
+
+            <TextView
+                android:id="@+id/urlMid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:singleLine="true"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                tools:text="url" />
+
+            <TextView
+                android:id="@+id/urlEnd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="25dp"
+                android:alpha="0.7"
+                android:paddingStart="0dp"
+                android:paddingEnd="5sp"
+                android:singleLine="true"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                tools:text=".com/app/long-example-string" />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/addBookmark"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_bookmark_off"
+            android:tooltipText="@string/web_add_bookmark"
+            android:visibility="gone"
+            tools:ignore="UnusedAttribute" />
+
+        <ImageButton
+            android:id="@+id/removeBookmark"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_bookmark_on"
+            android:tooltipText="@string/web_remove_bookmark"
+            android:visibility="gone"
+            tools:ignore="UnusedAttribute" />
+
+        <ImageButton
+            android:id="@+id/extensions"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_extensions"
+            android:tooltipText="@string/extension_prompt_title"
+            tools:ignore="UnusedAttribute" />
+
+        <ImageButton
+            android:id="@+id/kill"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_running_stop"
+            android:tooltipText="@string/web_exit"
+            android:visibility="gone"
+            tools:ignore="UnusedAttribute" />
+
+        <ImageButton
+            android:id="@+id/exit"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_down"
+            android:tooltipText="@string/tip_kill_process"
+            tools:ignore="UnusedAttribute" />
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/loading"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="-2dp"
+        android:indeterminate="true"
+        android:indeterminateTint="#E4E4E4"
+        android:maxHeight="5dp"
+        android:minHeight="5dp"
+        android:scaleY="4"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/topBarEdit"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:paddingLeft="7dp"
+        android:paddingRight="7dp"
+        android:visibility="gone">
+
+
+        <EditText
+            android:id="@+id/urlEdit"
+            style="@style/SettingButtonLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:hint="@string/web_search"
+            android:inputType="textUri"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            tools:text="discord.com/app" />
+
+        <ImageButton
+            android:id="@+id/cancel"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_close"
+            android:tooltipText="@string/web_cancel"
+            tools:ignore="DuplicateIds,UnusedAttribute" />
+
+        <ImageButton
+            android:id="@+id/confirm"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_confirm"
+            android:tooltipText="@string/web_confirm"
+            tools:ignore="UnusedAttribute" />
+
+    </LinearLayout>
+</com.threethan.browser.browser.CursorLayout>

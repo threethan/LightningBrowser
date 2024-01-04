@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Lightning Browser</string>
+    <string name="add_group">Add Group</string>
+    <string name="delete_group">Delete Group</string>
+    <string name="edit_group">Edit Group</string>
+    <string name="app_details">App Details</string>
+    <string name="apps_hidden">- Hidden</string>
+
+    <string name="bookmarks_title">Bookmarks</string>
+    <string name="tabs_title">Active Tabs</string>
+    <string name="tabs_info">Active tabs can play and record audio in the background unless closed</string>
+
+    <!--  Tooltips  -->
+    <string name="tip_kill_process">Stop Website Fully</string>
+    <string name="tip_launch_out">Launch in Own Window Once</string>
+
+    <string name="tip_info_website">About Adding Websites</string>git
+
+    <string name="tip_stop_editing">Turn Off Edit Mode</string>
+    <string name="tip_select_all">Select/Deselect All Visible Apps</string>
+
+    <string name="tip_uninstall">Uninstall / Remove</string>
+    <string name="tip_uninstall_bulk">Uninstall / Remove All Selected</string>
+    <string name="tip_info">Android App Info</string>
+    <string name="tip_change_icon">Change Icon</string>
+
+    <string name="tip_save_settings">Backup All Settings &amp; Groupings</string>
+    <string name="tip_load_settings">Restore All Settings &amp; Groupings</string>
+
+    <string name="tip_hide">Hide this App</string>
+    <string name="tip_show">Un-Hide this App</string>
+
+    <!--  Toasts  -->
+    <string name="moved_hidden">Moved to</string>
+    <string name="moved_hidden_bold">Hidden Group</string>
+    <string name="moved_shown">Moved to</string>
+    <string name="refreshed_icon">Refreshing icon…</string>
+
+    <!--  Web Presets  -->
+    <string name="preset_google" translatable="false">google.com</string>
+    <string name="preset_youtube" translatable="false">youtube.com</string>
+    <string name="preset_discord" translatable="false">discord.com/app</string>
+    <string name="preset_spotify" translatable="false">open.spotify.com</string>
+    <string name="preset_tidal" translatable="false">listen.tidal.com</string>
+    <string name="preset_apkmirror" translatable="false">apkmirror.com</string>
+    <string name="preset_apkpure" translatable="false">apkpure.com</string>
+
+    <string name="notification_title_n">Lightning Browser: No Websites Running</string>
+    <string name="notification_title_s">Lightning Browser: Running a Website</string>
+    <string name="notification_title_p">Lightning Browser: Running %1$d Websites</string>
+    <string name="notification_content">This notification keeps your websites\' background audio running smoothly.</string>
+
+    <!-- Addons -->
+    <string name="addons_install">Install</string>
+    <string name="addons_update">Update</string>
+    <string name="addons_activate">Activate</string>
+    <string name="addons_uninstall">Remove</string>
+
+    <!--  Browser Tooltips  -->
+    <string name="web_back">Navigate Back</string>
+    <string name="web_forward">Navigate Forward</string>
+    <string name="web_reload">Refresh this Page</string>
+    <string name="web_exit">Minimize Tab</string>
+    <string name="web_add_bookmark">Add Page to Bookmarks</string>
+    <string name="web_remove_bookmark">Remove Bookmark</string>
+    <string name="web_cancel">Cancel</string>
+    <string name="web_confirm">Confirm &amp; Go</string>
+    <string name="web_close">Close</string>
+
+    <!-- Browser -->
+    <string name="web_download_started">Downloading</string>
+    <string name="web_download_finished">Finished downloading</string>
+
+    <string name="web_apk_prompt_title">APK File Downloaded</string>
+    <string name="web_apk_prompt_message_pre">Finished downloading %1$s</string>
+    <string name="web_apk_prompt_message">Would you like to install it, or save it to your downloads folder?\n
+    \nNote that this file was downloaded from the internet, and may be harmful!</string>
+    <string name="web_apk_prompt_install">Install</string>
+    <string name="web_apk_prompt_move">Save</string>
+    <string name="web_apk_prompt_delete">Delete</string>
+    <string name="extension_prompt_title">Manage Web Extensions</string>
+    <string name="extension_prompt_hint">Get Extensions from Firefox Addons</string>
+
+    <string name="web_search">Search or Enter URL</string>
+
+    <!-- Misc. -->
+    <string name="warning">Important Info</string>
+    <string name="cancel">Cancel</string>
+    <string name="understood">Got It!</string>
+    <string name="confirm">Confirm</string>
+    <string name="next">Continue</string>
+
+    <!-- Gecko -->
+    <string name="before_unload_message">This page is asking you to confirm that you want to leave - data you have entered may not be saved</string>
+    <string name="before_unload_title">Are you sure?</string>
+    <string name="before_unload_leave_page">Leave Page</string>
+    <string name="before_unload_stay">Stay on Page</string>
+
+    <string name="repost_confirm_message">To display this page, GeckoViewExample must send information that will repeat any action (such as a search or order confirmation) that was performed earlier.</string>
+    <string name="repost_confirm_title">Are you sure?</string>
+    <string name="repost_confirm_resend">Resend</string>
+    <string name="repost_confirm_cancel">Cancel</string>
+
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="clear_field">Clear</string>
+
+    <string name="wait">Wait</string>
+    <string name="stop">Stop</string>
+</resources>

@@ -1,0 +1,27 @@
+{
+ "manifest_version": 2,
+ "name": "Lightning Launcher Fixes",
+ "author": "threethan",
+ "version": "1",
+ "description": "Various fixes/improvements for websites in Lightning Browser, do not remove!",
+ "content_scripts": [
+  {
+   "matches": [
+    "*://open.spotify.com/*"
+   ],
+   "run_at": "document_idle",
+   "js": [
+    "spotify.js"
+   ],
+   "css": [
+    "spotify.css"
+   ]
+  }
+ ],
+ "browser_specific_settings": {
+  "gecko": {
+   "id": "fixes@internal.ext",
+   "strict_min_version": "42.0"
+  }
+ }
+}

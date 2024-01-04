@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/sizer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/bkg_dialog"
+        android:maxWidth="500dp"
+        android:orientation="horizontal"
+        android:paddingStart="15sp"
+        android:paddingTop="8sp"
+        android:paddingEnd="15sp"
+        android:paddingBottom="8sp">
+
+        <TextView
+            android:id="@+id/toastTextMain"
+            style="@style/ToastText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="500dp"
+            android:singleLine="true"
+            tools:text="Downloading" />
+
+        <TextView
+            android:id="@+id/toastTextBold"
+            style="@style/ToastText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5sp"
+            android:maxWidth="500dp"
+            android:singleLine="true"
+            android:textStyle="bold"
+            tools:text="Example Text for this viewExample Text for this viewExample Text for this viewExample Text for this viewExample Text for this view" />
+
+
+    </LinearLayout>
+
+</FrameLayout>

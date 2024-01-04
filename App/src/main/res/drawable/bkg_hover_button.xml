@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="false" android:state_hovered="true" android:drawable="@drawable/bkg_hover_button_hovered" />
+    <item android:state_checked="false" android:state_focused="true" android:drawable="@drawable/bkg_hover_button_hovered" />
+    <item android:state_checked="true" android:state_hovered="true" android:drawable="@drawable/bkg_hover_button_checked_hovered"/>
+    <item android:state_checked="true" android:state_focused="true" android:drawable="@drawable/bkg_hover_button_checked_hovered"/>
+
+</selector>
