@@ -288,20 +288,24 @@ public class BrowserService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private static final int BIND_FLAGS = BIND_ABOVE_CLIENT | BIND_IMPORTANT | 0x000010000 | 0x10000000;
+    private static final int BIND_FLAGS = BIND_ABOVE_CLIENT | BIND_IMPORTANT;
     public static void bind(Activity activity, ServiceConnection connection, boolean needed){
         Intent intent = new Intent(activity, BrowserService.class);
-        if (amRunning(activity)) {
-            try {
-                activity.bindService(intent, connection, BIND_FLAGS);
-            } catch (SecurityException ignored) {
-                activity.bindService(intent, connection, BIND_ABOVE_CLIENT | BIND_IMPORTANT);
-            }
-        } else if (needed) {
+        if (amRunning(activity)) bindTo(activity, intent, connection, BIND_FLAGS);
+        else if (needed) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 activity.startForegroundService(intent);
-                activity.bindService(intent, connection, BIND_FLAGS);
-            } else activity.bindService(intent, connection, BIND_AUTO_CREATE | BIND_FLAGS);
+                bindTo(activity, intent, connection, BIND_FLAGS);
+            } else bindTo(activity, intent, connection, BIND_AUTO_CREATE | BIND_FLAGS);
+        }
+    }
+    private static void bindTo(Activity activity, Intent intent, ServiceConnection connection,
+                               int flags) {
+        try {
+            // Add additional priority, may fail on some devices
+            activity.bindService(intent, connection, flags | 0x000010000 | 0x10000000);
+        } catch (SecurityException ignored) {
+            activity.bindService(intent, connection, flags);
         }
     }
 
