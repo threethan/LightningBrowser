@@ -13,9 +13,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-    <uses-feature android:name="android.hardware.vr.headtracking" android:required="false"/>
-    <uses-feature android:name="oculus.software.handtracking" android:required="false"/>
-
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
@@ -40,8 +37,6 @@
         tools:ignore="UnusedAttribute"
         android:banner="@drawable/ic_app_banner"
         android:hardwareAccelerated="true">
-
-        <meta-data android:name="com.oculus.supportedDevices" android:value="all"/>
 
         <!-- Main activity -->
         <!-- Activity for browsers which open within the main window -->
