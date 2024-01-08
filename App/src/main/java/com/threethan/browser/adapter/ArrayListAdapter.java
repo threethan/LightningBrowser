@@ -1,5 +1,7 @@
 package com.threethan.browser.adapter;
 
+import android.annotation.SuppressLint;
+
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public abstract class ArrayListAdapter<T, H extends RecyclerView.ViewHolder> ext
      * notifyDataSetChanged()
      * @param newItems the new list of items
      */
+    @SuppressLint("NotifyDataSetChanged")
     public void setItems(List<T> newItems) {
         final Map<Integer, Integer> movedPrevByNew = new HashMap<>(); // to -> from
         for (T item : new ArrayList<>(items)) {
@@ -46,13 +49,20 @@ public abstract class ArrayListAdapter<T, H extends RecyclerView.ViewHolder> ext
                 notifyItemInserted(i);
             }
         }
-        final List<T> oldItems = new ArrayList<>(items);
-        items.clear();
-        items.addAll(newItems);
-        for (T item : oldItems) {
-            final int oldIndex = oldItems.indexOf(item);
+        for (T item : newItems) {
+            final int oldIndex = items.indexOf(item);
             final int newIndex = newItems.indexOf(item);
-            if (oldIndex != newIndex) notifyItemMoved(oldIndex, newIndex);
+            if (oldIndex != newIndex) {
+                items.remove(oldIndex);
+                items.add(newIndex, item);
+                notifyItemMoved(oldIndex, newIndex);
+            }
+        }
+        // Failsafe, just in case
+        if (!items.equals(newItems)) {
+            items.clear();
+            items.addAll(newItems);
+            notifyDataSetChanged();
         }
     }
 

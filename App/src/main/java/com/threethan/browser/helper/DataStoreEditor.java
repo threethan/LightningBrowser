@@ -37,19 +37,23 @@ import io.reactivex.rxjava3.functions.Consumer;
  *     {@link SharedPreferences}.
  * <p>
  *     In many cases, this may just be a drop-in replacement. However, keep in mind that writes are
- *     always asynchrous, so async write followed by a read may produce unexpected results.
+ *     asynchronous by default, so async write followed by a read may produce unexpected results.
+ *     You may set 'asyncWrite' to false at any time to get back synchronous behaviours.
  * <p>
- *     Additional functions are provided for asynchrous reading and better handling of DataStores,
+ *     Additional functions are provided for asynchronous reading and better handling of DataStores,
  *     which will be accessible when using this class directly, and make implementation of DataStore
  *     in Java much easier.
- * @see SharedPreferences
- * @see Editor
+ * @see android.content.SharedPreferences
+ * @see android.content.SharedPreferences.Editor
  * @see androidx.datastore.core.DataStore
  * @noinspection unused, UnusedReturnValue
  * */
 public class DataStoreEditor implements SharedPreferences, SharedPreferences.Editor {
     private static final String TAG = "DataStoreEditor";
     private static final Map<String, RxDataStore<Preferences>> dataStoreByName = new HashMap<>();
+    /** If true, all write operations will be done asynchronously.
+     * If false, all write operations will be blocking. */
+    public boolean asyncWrite = true;
     RxDataStore<Preferences> dataStoreRX;
 
     /** @noinspection rawtypes*/
@@ -85,6 +89,8 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
      * Data WILL be overridden!
      * You should include your own mechanism to avoid running this more than once.
      * @param sharedPreferences The sharedPreferences instance to migrate from
+     * <p>
+     * You may wish to set 'asyncWrite' to false before this operation.
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void migrateFrom(SharedPreferences sharedPreferences) {
@@ -100,6 +106,7 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
      * Migrates default sharedPreferences to this DataStore (calls migrateFrom)
      * Data WILL be overridden!
      * You should include your own mechanism to avoid running this more than once.
+     * You may wish to set 'asyncWrite' to false before this operation.
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void migrateDefault(Context context) {
@@ -186,8 +193,7 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
      */
     public <T> void getValue(String key, @Nullable T def, Consumer<T> consumer, Class<T> tClass) {
         Preferences.Key<T> prefKey = getKey(key, tClass);
-        @SuppressLint("UnsafeOptInUsageWarning")
-        Single<T> value = dataStoreRX.data().firstOrError()
+        @SuppressLint("UnsafeOptInUsageWarning") Single<T> value = dataStoreRX.data().firstOrError()
                 .map(prefs -> prefs.get(prefKey)).onErrorReturn(throwable -> def);
         value.blockingSubscribe(consumer);
     }
@@ -200,8 +206,7 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
      */
     public <T> void getValue(String key, @NonNull T def, Consumer<T> consumer) {
         Preferences.Key<T> prefKey = getKey(key, def);
-        @SuppressLint("UnsafeOptInUsageWarning")
-        Single<T> value = dataStoreRX.data().firstOrError()
+        @SuppressLint("UnsafeOptInUsageWarning") Single<T> value = dataStoreRX.data().firstOrError()
                 .map(prefs -> prefs.get(prefKey)).onErrorReturn(throwable -> def);
         value.blockingSubscribe(consumer);
     }
@@ -216,12 +221,28 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
     public <T> void putValue(String key, @Nullable T value, Class<T> tClass) {
         boolean returnvalue;
         Preferences.Key<T> prefKey = getKey(key, tClass);
-        @SuppressLint("UnsafeOptInUsageWarning")
-        Single<Preferences> updateResult =  dataStoreRX.updateDataAsync(prefsIn -> {
+        @SuppressLint("UnsafeOptInUsageWarning") Single<Preferences> updateResult =  dataStoreRX.updateDataAsync(prefsIn -> {
             MutablePreferences mutablePreferences = prefsIn.toMutablePreferences();
             mutablePreferences.set(prefKey, value);
             return Single.just(mutablePreferences);
         });
+    }
+    /**
+     * Writes a value which matches the given class
+     * @param key Name of key to write to
+     * @param value Value to write
+     * @param tClass Class of the value
+     * @param <T> Type of the value, should be derived automatically from tClass
+     */
+    public <T> void putValue(String key, @Nullable T value, Class<T> tClass, boolean synchronous) {
+        boolean returnvalue;
+        Preferences.Key<T> prefKey = getKey(key, tClass);
+        @SuppressLint("UnsafeOptInUsageWarning") Single<Preferences> updateResult =  dataStoreRX.updateDataAsync(prefsIn -> {
+            MutablePreferences mutablePreferences = prefsIn.toMutablePreferences();
+            mutablePreferences.set(prefKey, value);
+            return Single.just(mutablePreferences);
+        });
+        if (synchronous) { Preferences ignored = updateResult.blockingGet(); }
     }
 
     /**
@@ -229,15 +250,25 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
      * @param key Name of key to write to
      * @param value Value to write
      * @param <T> Type of the value, should be derived automatically from value
-     */    public <T> void putValue(String key, @NonNull T value) {
+     */
+    public <T> void putValue(String key, @NonNull T value) {
+        putValue(key, value, false);
+    }
+    /**
+     * Writes a value which matches the given class
+     * @param key Name of key to write to
+     * @param value Value to write
+     * @param <T> Type of the value, should be derived automatically from value
+     */
+    public <T> void putValue(String key, @NonNull T value, boolean synchronous) {
         boolean returnvalue;
         Preferences.Key<T> prefKey = getKey(key, value);
-        @SuppressLint("UnsafeOptInUsageWarning")
-        Single<Preferences> updateResult =  dataStoreRX.updateDataAsync(prefsIn -> {
+        @SuppressLint("UnsafeOptInUsageWarning") Single<Preferences> updateResult =  dataStoreRX.updateDataAsync(prefsIn -> {
             MutablePreferences mutablePreferences = prefsIn.toMutablePreferences();
             mutablePreferences.set(prefKey, value);
             return Single.just(mutablePreferences);
         });
+        if (synchronous) { Preferences ignored = updateResult.blockingGet(); }
     }
 
     /**
@@ -246,7 +277,16 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
      * @param tClass Class of the value
      * @param <T> Type of the value, should be derived automatically from tClass
      */
-    public <T> void removeValue(String key, Class<T> tClass){
+    public <T> void removeValue(String key, Class<T> tClass) {
+        removeValue(key, tClass, false);
+    }
+    /**
+     * Removes a value which matches the given class
+     * @param key Name of the key to remove
+     * @param tClass Class of the value
+     * @param <T> Type of the value, should be derived automatically from tClass
+     */
+    public <T> void removeValue(String key, Class<T> tClass, boolean synchronous){
         boolean returnvalue;
         Preferences.Key<T> prefKey = getKey(key, tClass);
         @SuppressLint("UnsafeOptInUsageWarning")
@@ -255,6 +295,7 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
             T remove = mutablePreferences.remove(prefKey);
             return Single.just(mutablePreferences);
         });
+        if (synchronous) { Preferences ignored = updateResult.blockingGet(); }
     }
 
     /**
