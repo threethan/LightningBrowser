@@ -33,7 +33,7 @@ android {
 }
 ext {
     // https://maven.mozilla.org/?prefix=maven2/org/mozilla/geckoview/
-    geckoviewVersion = "121.0.20231230165955"
+    geckoviewVersion = "125.0.20240419144423"
 }
 dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
