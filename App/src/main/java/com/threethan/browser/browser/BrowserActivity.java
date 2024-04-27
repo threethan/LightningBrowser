@@ -18,6 +18,7 @@ import com.threethan.browser.helper.Dialog;
 import com.threethan.browser.helper.FaviconLoader;
 import com.threethan.browser.helper.Keyboard;
 import com.threethan.browser.lib.StringLib;
+import com.threethan.browser.updater.BrowserUpdater;
 import com.threethan.browser.wrapper.BoundActivity;
 public class BrowserActivity extends BoundActivity {
     private BrowserWebView w;
@@ -165,6 +166,8 @@ public class BrowserActivity extends BoundActivity {
         });
 
         findViewById(R.id.extensions).setOnClickListener(v -> BrowserService.ManageExtensions());
+
+        new BrowserUpdater(this).checkAppUpdateInteractive();
     }
 
     private void updateButtonsAndUrl() {

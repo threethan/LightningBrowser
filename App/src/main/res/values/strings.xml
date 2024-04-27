@@ -108,4 +108,31 @@
 
     <string name="wait">Wait</string>
     <string name="stop">Stop</string>
+
+
+    <!--  Updater  -->
+    <string name="update_title">An update is available!</string>
+    <string name="update_content">You can update from version %1$s to %2$s, all in this app.</string>
+    <string name="update_button">Continue</string>
+    <string name="update_skip_button">Skip this Update</string>
+    <string name="update_skip_toast">Skipped version</string>
+
+    <string name="update_downloading_title">Downloading Latest Version of %s</string>
+    <string name="update_downloading_content">You should get a prompt to install shortly.\n
+    \nIf you accidentally dismissed it, didn\'t give permission, or got an error,
+    you can try again from settings.</string>
+    <string name="update_hide_button">Hide</string>
+
+    <string name="update_failed_title">Failed to download package!</string>
+    <string name="update_failed_content">Make sure you have a good internet connection and try again later.</string>
+
+    <string name="update_skip_title">Skip updating to version %1$s?</string>
+    <string name="update_skip_content">You will not be notified about this update again.\n
+        \nKeep in mind that updates are highly recommended and may include important fixes.\n
+        \nIf you are avoiding this update because it causes issues, report your issues at github.com/threethan/Lightning Launcher\n
+        \nYOU CAN UPDATE LATER FROM THE SETTINGS!</string>
+    <string name="update_skip_confirm_button">I Understand, Skip It</string>
+    <string name="update_skip_cancel_button">Just Dismiss</string>
+
+
 </resources>

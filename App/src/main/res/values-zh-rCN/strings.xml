@@ -96,4 +96,25 @@
     <string name="wait">等待</string>
     <string name="stop">停止</string>
     <string name="web_close">出口</string>
+
+
+    <!--  Updater  -->
+    <string name="update_title">有更新可用!</string>
+    <string name="update_content">您可以在此应用程序中将 %1$s 版本升级到 %2$s。</string>
+    <string name="update_button">继续</string>
+    <string name="update_skip_button">跳过本次更新</string>
+    <string name="update_skip_toast">跳过版本</string>
+
+    <string name="update_downloading_title">下载最新版本 (%s)</string>
+    <string name="update_downloading_content">很快就会出现安装提示\n\n    \n如果你不小心将其删除、未授予权限或出现错误、\n    你可以从设置中再试一次。</string>
+    <string name="update_hide_button">隐藏</string>
+
+    <string name="update_failed_title">下载安装包失败</string>
+    <string name="update_failed_content">请确保网络连接良好，稍后再试</string>
+
+    <string name="update_skip_title">跳过更新到 %1$s 版本？</string>
+    <string name="update_skip_content">您将不会再收到有关此更新的通知。\n\n        \n请记住，我们强烈建议进行更新，更新可能包括重要的修复。\n\n        \n如果你因该更新导致的问题而回避该更新，请在 github.com/threethan/Lightning Launcher 上报告你的问题。\n\n        \n你可以稍后从设置中更新！</string>
+    <string name="update_skip_confirm_button">我已了解，跳过</string>
+    <string name="update_skip_cancel_button">忽略</string>
+
 </resources>

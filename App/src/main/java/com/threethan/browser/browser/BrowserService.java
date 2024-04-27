@@ -34,6 +34,7 @@ import com.threethan.browser.browser.GeckoView.Delegate.ExtensionPromptDelegate;
 import com.threethan.browser.helper.Dialog;
 import com.threethan.browser.lib.FileLib;
 import com.threethan.browser.lib.StringLib;
+import com.threethan.browser.updater.RemotePackageUpdater;
 import com.threethan.browser.wrapper.BoundActivity;
 
 import org.mozilla.geckoview.GeckoRuntime;
@@ -57,7 +58,7 @@ public class BrowserService extends Service {
     public final static Set<BoundActivity> watchingActivities = new HashSet<>();
     private static int currentTabIdIndex = 0;
     public static final String TAB_PREFIX = "$tab::";
-    public final static String APK_DIR = "DownloadedAPKs/";
+    public final static String APK_DIR = RemotePackageUpdater.APK_FOLDER;
 
     // Arbitrary ID for the persistent notification
     private final static int NOTIFICATION_ID = 42;
@@ -182,8 +183,7 @@ public class BrowserService extends Service {
                 final File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 final File file = new File(path, filename);
 
-                // provider is already included in the imagepicker lib
-                Uri fileURI = FileProvider.getUriForFile(getBaseContext(), getApplicationContext().getPackageName() + ".imagepicker.provider", file);
+                Uri fileURI = FileProvider.getUriForFile(getBaseContext(), getApplicationContext().getPackageName() + RemotePackageUpdater.PROVIDER, file);
 
                 Intent openIntent = new Intent(Intent.ACTION_VIEW);
                 openIntent.setDataAndType(fileURI, getContentResolver().getType(fileURI));
@@ -208,8 +208,7 @@ public class BrowserService extends Service {
     private void promptInstallApk(File file) {
         if(!file.exists()) return;
 
-        // provider is already included in the imagepicker lib
-        Uri apkURI = FileProvider.getUriForFile(getBaseContext(), getApplicationContext().getPackageName() + ".imagepicker.provider", file);
+        Uri apkURI = FileProvider.getUriForFile(getBaseContext(), getApplicationContext().getPackageName() + RemotePackageUpdater.PROVIDER, file);
 
         Intent openIntent = new Intent(Intent.ACTION_VIEW);
         openIntent.setDataAndType(apkURI, "application/vnd.android.package-archive");

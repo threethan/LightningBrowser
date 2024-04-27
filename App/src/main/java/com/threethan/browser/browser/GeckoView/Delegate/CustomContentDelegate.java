@@ -42,10 +42,10 @@ public class CustomContentDelegate implements GeckoSession.ContentDelegate {
 
         if (filename.endsWith(".apk")) request.setDestinationInExternalFilesDir(mActivity, BrowserService.APK_DIR, filename);
         else try {
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
         } catch (IllegalStateException ignored) {
-        // If we can't access downloads dir
-        request.setDestinationInExternalFilesDir(mActivity, Environment.DIRECTORY_DOWNLOADS, filename);
+            // If we can't access downloads dir
+            request.setDestinationInExternalFilesDir(mActivity, Environment.DIRECTORY_DOWNLOADS, filename);
         }
 
         DownloadManager manager = (DownloadManager) mActivity.getSystemService(DOWNLOAD_SERVICE);
