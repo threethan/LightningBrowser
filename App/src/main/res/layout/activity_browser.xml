@@ -164,7 +164,7 @@
             android:layout_marginBottom="8dp"
             android:background="@drawable/bkg_button_web"
             android:src="@drawable/web_running_stop"
-            android:tooltipText="@string/web_exit"
+            android:tooltipText="@string/tip_kill_process"
             android:visibility="gone"
             tools:ignore="UnusedAttribute" />
 
@@ -178,7 +178,7 @@
             android:layout_marginBottom="8dp"
             android:background="@drawable/bkg_button_web"
             android:src="@drawable/web_down"
-            android:tooltipText="@string/tip_kill_process"
+            android:tooltipText="@string/web_exit"
             tools:ignore="UnusedAttribute" />
 
     </LinearLayout>
