@@ -16,9 +16,12 @@ import com.threethan.browser.R;
 import com.threethan.browser.browser.BrowserActivity;
 import com.threethan.browser.browser.BrowserService;
 import com.threethan.browser.helper.Dialog;
+import com.threethan.browser.lib.FileLib;
 
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.WebResponse;
+
+import java.io.File;
 
 public class CustomContentDelegate implements GeckoSession.ContentDelegate {
     public BrowserActivity mActivity;
@@ -40,7 +43,11 @@ public class CustomContentDelegate implements GeckoSession.ContentDelegate {
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
 
-        if (filename.endsWith(".apk")) request.setDestinationInExternalFilesDir(mActivity, BrowserService.APK_DIR, filename);
+        if (filename.endsWith(".apk")) {
+            final File apkFile = new File(mActivity.getExternalCacheDir()+"/"+BrowserService.APK_DIR, filename);
+            FileLib.delete(apkFile);
+            request.setDestinationUri(Uri.fromFile(apkFile));
+        }
         else try {
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
         } catch (IllegalStateException ignored) {

@@ -63,15 +63,19 @@ public class BrowserActivity extends BoundActivity {
         else currentUrl = DEFAULT_URL;
 
         isTab = getIntent().getBooleanExtra("isTab", false);
-        if (getIntent().getExtras() != null && isTab) {
-            if (currentUrl.startsWith(BrowserService.TAB_PREFIX)) {
-                tabId = currentUrl;
-                currentUrl = BrowserService.getUrl(tabId);
-            } else tabId = BrowserService.getNewTabId();
-        }
 
-        if (getIntent().getExtras() != null) isEphemeral =
-                getIntent().getBooleanExtra("isEphemeral", false);
+        if (getIntent().getExtras() != null) {
+            isEphemeral = getIntent().getBooleanExtra("isEphemeral", false);
+            if (isTab) {
+                if (currentUrl.startsWith(BrowserService.TAB_PREFIX)) {
+                    tabId = currentUrl;
+                    currentUrl = BrowserService.getUrl(tabId);
+                } else tabId = BrowserService.getNewTabId();
+            }
+        }
+        if (tabId == null) tabId = BrowserService.TAB_PREFIX+"ext::"+currentUrl;
+        Log.v("Lightning Browser", "... with url " + currentUrl + (isTab ? ", is a tab":", not a tab") + ", assigned id "+tabId);
+
 
         // Back/Forward Buttons
         back = findViewById(R.id.back);

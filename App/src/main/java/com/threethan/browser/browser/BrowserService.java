@@ -59,6 +59,7 @@ public class BrowserService extends Service {
     private static int currentTabIdIndex = 0;
     public static final String TAB_PREFIX = "$tab::";
     public final static String APK_DIR = RemotePackageUpdater.APK_FOLDER;
+    private static final boolean AUTOMATICALLY_OPEN_DOWNLOADS = false; // Causes issues
 
     // Arbitrary ID for the persistent notification
     private final static int NOTIFICATION_ID = 42;
@@ -156,8 +157,8 @@ public class BrowserService extends Service {
             if (filename == null) return;
 
             if (filename.endsWith(".apk")) {
-                final File path = getApplicationContext().getExternalFilesDir(APK_DIR);
-                final File file = new File(path, filename);
+
+                final File file = new File(getExternalCacheDir()+"/"+APK_DIR, filename);
 
                 if (Dialog.getActivityContext() == null) {
                     // If we can't show an alert, copy AND prompt install
@@ -183,18 +184,21 @@ public class BrowserService extends Service {
                 final File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 final File file = new File(path, filename);
 
-                Uri fileURI = FileProvider.getUriForFile(getBaseContext(), getApplicationContext().getPackageName() + RemotePackageUpdater.PROVIDER, file);
+                if (AUTOMATICALLY_OPEN_DOWNLOADS)
+                    try {
+                        Uri fileURI = FileProvider.getUriForFile(getBaseContext(), getApplicationContext().getPackageName() + RemotePackageUpdater.PROVIDER, file);
 
-                Intent openIntent = new Intent(Intent.ACTION_VIEW);
-                openIntent.setDataAndType(fileURI, getContentResolver().getType(fileURI));
-                openIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                openIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        Intent openIntent = new Intent(Intent.ACTION_VIEW);
+                        openIntent.setDataAndType(fileURI, getContentResolver().getType(fileURI));
+                        openIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        openIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                try {
-                    startActivity(openIntent);
-                } catch (ActivityNotFoundException ignored) {
+                        startActivity(openIntent);
+                    } catch (ActivityNotFoundException ignored) {
+                        Dialog.toast(getString(R.string.web_download_finished), filename, true);
+                    }
+                else
                     Dialog.toast(getString(R.string.web_download_finished), filename, true);
-                }
             }
         }
     };
@@ -232,15 +236,15 @@ public class BrowserService extends Service {
         return webViewByTabId.containsKey(tabId);
     }
     public void killWebView(String tabId) {
+        if (activityByTabId.get(tabId) != null) {
+            Objects.requireNonNull(activityByTabId.get(tabId)).finish();
+            activityByTabId.remove(tabId);
+        }
         if (!hasWebView(tabId)) return;
         BrowserWebView webView = webViewByTabId.get(tabId);
         if (webView == null) return;
         webView.kill();
         webViewByTabId.remove(tabId);
-        if (activityByTabId.get(tabId) != null) {
-            Objects.requireNonNull(activityByTabId.get(tabId)).finish();
-            activityByTabId.remove(tabId);
-        }
         System.gc();
         updateStatus();
     }
