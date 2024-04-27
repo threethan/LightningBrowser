@@ -147,7 +147,7 @@ public class BrowserActivity extends BoundActivity {
         urlEdit.setOnKeyListener((v, keyCode, event) -> {
             if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                 // Perform action on Enter key press
-                topBarEdit.findViewById(R.id.cancel).callOnClick();
+                topBarEdit.findViewById(R.id.confirm).callOnClick();
                 return true;
             }
             return false;
