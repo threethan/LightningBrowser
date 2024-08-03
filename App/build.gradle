@@ -4,7 +4,7 @@ android {
     defaultConfig {
         compileSdk 34
         minSdkVersion 23
-        targetSdk 34
+        targetSdkVersion 34
         versionCode 1101
         versionName "1.1.0.1"
         ndk {
