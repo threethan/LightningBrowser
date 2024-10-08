@@ -30,10 +30,10 @@ public class CustomNavigationDelegate implements GeckoSession.NavigationDelegate
     public void onCanGoForward(@NonNull GeckoSession session, boolean canGoForward) {
         this.canGoForward = canGoForward;
     }
+
     @Override
-    public void onLocationChange(@NonNull GeckoSession session, @Nullable String url,
-                                 @NonNull List<GeckoSession.PermissionDelegate.ContentPermission> perms) {
-        GeckoSession.NavigationDelegate.super.onLocationChange(session, url, perms);
+    public void onLocationChange(@NonNull GeckoSession session, @Nullable String url, @NonNull List<GeckoSession.PermissionDelegate.ContentPermission> perms, @NonNull Boolean hasUserGesture) {
+        GeckoSession.NavigationDelegate.super.onLocationChange(session, url, perms, hasUserGesture);
 
         if (url != null && !url.isEmpty() && !url.equals("about:blank")) {
             currentUrl = url;

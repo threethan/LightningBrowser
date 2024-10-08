@@ -6,7 +6,7 @@ android {
         minSdkVersion 23
         versionCode 1200
         versionName "1.2.0"
-        targetSdk 34
+
         ndk {
             //noinspection ChromeOsAbiSupport
             abiFilters "arm64-v8a"
@@ -34,10 +34,12 @@ android {
 }
 ext {
     // https://maven.mozilla.org/?prefix=maven2/org/mozilla/geckoview/
-    geckoviewVersion = "131.0.20240923135042"
+    geckoviewVersion = "129.0.20240819150008" // Newer versions have issues :(
 }
 dependencies {
+
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    //noinspection GradleDependency
     implementation "org.mozilla.geckoview:geckoview:${geckoviewVersion}"
     //noinspection GradleDependency
     implementation 'androidx.datastore:datastore-preferences-rxjava3:1.0.0'

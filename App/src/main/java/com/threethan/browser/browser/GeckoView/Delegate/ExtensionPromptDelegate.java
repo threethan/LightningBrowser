@@ -26,6 +26,7 @@ import org.mozilla.geckoview.WebExtensionController;
 
 public class ExtensionPromptDelegate implements WebExtensionController.PromptDelegate {
     final static String EXTENSIONS_URL = "https://addons.mozilla.org/firefox/extensions/";
+    /** @noinspection deprecation*/
     @Nullable
     @Override
     public GeckoResult<AllowOrDeny> onInstallPrompt(@NonNull WebExtension extension) {
@@ -39,7 +40,6 @@ public class ExtensionPromptDelegate implements WebExtensionController.PromptDel
 
         final AlertDialog dialog = Dialog.build(activity, R.layout.dialog_webextensions);
         assert dialog != null;
-        dialog.hide();
 
         dialog.findViewById(R.id.getMoreButton).setOnClickListener(view -> {
             if (activity instanceof BrowserActivity) {
@@ -47,6 +47,7 @@ public class ExtensionPromptDelegate implements WebExtensionController.PromptDel
                 dialog.dismiss();
             }
         });
+
         View dismiss = dialog.findViewById(R.id.dismissButton);
         dismiss.setOnClickListener(view -> dialog.dismiss());
 
@@ -108,15 +109,13 @@ public class ExtensionPromptDelegate implements WebExtensionController.PromptDel
                         value.removeIf(webExtension -> webExtension.id.equals("fixes@internal.ext"));
                     }
                     adapter.addAll(value);
+
                     dialog.show();
 
                     ListView lv = dialog.findViewById(R.id.listView);
                     lv.setAdapter(adapter);
                     return null;
                 });
-
-
-
     }
 }
 

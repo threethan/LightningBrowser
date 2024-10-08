@@ -62,6 +62,7 @@
     <string name="web_forward">Navigate Forward</string>
     <string name="web_reload">Refresh this Page</string>
     <string name="web_exit">Minimize Tab</string>
+    <string name="web_hide_bar">Hide Top Bar</string>
     <string name="web_add_bookmark">Add Page to Bookmarks</string>
     <string name="web_remove_bookmark">Remove Bookmark</string>
     <string name="web_cancel">Cancel</string>

@@ -3,8 +3,6 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/bkg_dialog"
-    android:descendantFocusability="blocksDescendants"
-    android:focusable="false"
     android:orientation="vertical"
     android:padding="20dp">
 
@@ -35,6 +33,7 @@
     </ListView>
 
     <TextView
+
         android:id="@+id/getMoreButton"
         style="@style/SettingsText"
         android:layout_width="match_parent"
@@ -42,6 +41,8 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/bkg_button"
         android:gravity="center"
-        android:text="@string/extension_prompt_hint" />
+        android:text="@string/extension_prompt_hint">
+        <requestFocus/>
+    </TextView>
 
 </com.threethan.browser.browser.CursorLayout>

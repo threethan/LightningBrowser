@@ -169,6 +169,19 @@
             tools:ignore="UnusedAttribute" />
 
         <ImageButton
+            android:id="@+id/hideBar"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_up"
+            android:tooltipText="@string/web_hide_bar"
+            tools:ignore="UnusedAttribute" />
+
+        <ImageButton
             android:id="@+id/exit"
             android:layout_width="39dp"
             android:layout_height="match_parent"

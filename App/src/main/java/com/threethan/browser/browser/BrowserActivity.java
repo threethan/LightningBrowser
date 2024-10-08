@@ -36,6 +36,7 @@ public class BrowserActivity extends BoundActivity {
     protected final BookmarkManager bookmarkManager = new BookmarkManager(this);
     private boolean isEphemeral;
     private boolean isTab;
+    private boolean isTopBarHidden;
     private final String DEFAULT_URL = "https://www.google.com/";
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,6 +77,10 @@ public class BrowserActivity extends BoundActivity {
         if (tabId == null) tabId = BrowserService.TAB_PREFIX+"ext::"+currentUrl;
         Log.v("Lightning Browser", "... with url " + currentUrl + (isTab ? ", is a tab":", not a tab") + ", assigned id "+tabId);
 
+        if (!isTab) {
+            isTopBarHidden = true;
+            hideTopBar();
+        }
 
         // Back/Forward Buttons
         back = findViewById(R.id.back);
@@ -130,6 +135,13 @@ public class BrowserActivity extends BoundActivity {
             bookmarkRem.setVisibility(View.GONE);
             bookmarkAdd.setVisibility(View.VISIBLE);
             bookmarkManager.removeBookmark(currentUrl);
+        });
+
+        // Hide top bar
+        View hideBar = findViewById(R.id.hideBar);
+        hideBar.setOnClickListener(v -> {
+            isTopBarHidden = true;
+            hideTopBar();
         });
 
         // Edit URL
@@ -203,6 +215,7 @@ public class BrowserActivity extends BoundActivity {
     public void showTopBar() {
         findViewById(R.id.topBar).setVisibility(View.VISIBLE);
         findViewById(R.id.topBarEdit).setVisibility(View.GONE);
+        isTopBarHidden = false;
     }
     public void hideTopBar() {
         findViewById(R.id.topBar).setVisibility(View.GONE);
@@ -238,7 +251,9 @@ public class BrowserActivity extends BoundActivity {
 
     @Override
     public void onBackPressed() {
-        if (findViewById(R.id.topBarEdit).getVisibility() == View.VISIBLE)
+        if (isTopBarHidden) {
+            showTopBar();
+        } else if (findViewById(R.id.topBarEdit).getVisibility() == View.VISIBLE)
             findViewById(R.id.cancel).callOnClick();
         else {
             if (w.canGoBack()) {

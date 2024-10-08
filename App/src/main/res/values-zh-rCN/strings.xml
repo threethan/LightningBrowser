@@ -51,6 +51,7 @@
     <string name="web_forward">前进</string>
     <string name="web_reload">刷新页面</string>
     <string name="web_exit">退出选项卡</string>
+    <string name="web_hide_bar">隐藏顶部栏</string>
     <string name="web_add_bookmark">将页面添加到芸签</string>
     <string name="web_remove_bookmark">从标签中删除芸签</string>
     <string name="web_cancel">关闭</string>

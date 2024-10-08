@@ -4,7 +4,7 @@ A powerful Gecko-based browser for Android TV and VR.
 *(Previously part of [LightningLauncher](https://github.com/threethan/LightningLauncher))*
 
 ## Features
-- Dynamic cursor that allows for easy nagivation with an Android TV remote control
+- Dynamic cursor that allows for easy navigation with an Android TV remote control
 - Uses GeckoView (Firefox's core) for a modern browser even on outdated devices
 - Full support for Firefox extensions
 - Minimal, dynamic UI for easy navigation on screens big or small
