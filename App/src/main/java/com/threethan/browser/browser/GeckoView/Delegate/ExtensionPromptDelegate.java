@@ -33,6 +33,24 @@ public class ExtensionPromptDelegate implements WebExtensionController.PromptDel
         return GeckoResult.fromValue(AllowOrDeny.ALLOW);
     }
 
+    @Nullable
+    @Override
+    public GeckoResult<AllowOrDeny> onInstallPrompt(@NonNull WebExtension extension, @NonNull String[] permissions, @NonNull String[] origins) {
+        return GeckoResult.fromValue(AllowOrDeny.ALLOW);
+    }
+
+    @Nullable
+    @Override
+    public GeckoResult<AllowOrDeny> onOptionalPrompt(@NonNull WebExtension extension, @NonNull String[] permissions, @NonNull String[] origins) {
+        return GeckoResult.fromValue(AllowOrDeny.ALLOW);
+    }
+
+    @Nullable
+    @Override
+    public GeckoResult<AllowOrDeny> onUpdatePrompt(@NonNull WebExtension currentlyInstalled, @NonNull WebExtension updatedExtension, @NonNull String[] newPermissions, @NonNull String[] newOrigins) {
+        return GeckoResult.fromValue(AllowOrDeny.ALLOW);
+    }
+
     public void showList() {
 
         final Activity activity = Dialog.getActivityContext();

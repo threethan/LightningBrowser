@@ -94,8 +94,10 @@ public abstract class AppUpdater extends RemotePackageUpdater {
 
             updateDialogBuilder.setPositiveButton(R.string.update_button, (dialog, which) ->
                     downloadPackage(getAppPackage(newVersion)));
-            updateDialogBuilder.setNegativeButton(R.string.update_skip_button, (dialog, which) ->
-                    skipAppUpdate(newVersion));
+            updateDialogBuilder.setNegativeButton(R.string.update_skip_button, (dialog, which) -> {
+                dialog.dismiss();
+                skipAppUpdate(newVersion);
+            });
 
             updateDialogBuilder.show();
         } catch (Exception ignored) {} // This is not critical, and may fail if the launcher window isn't visible
