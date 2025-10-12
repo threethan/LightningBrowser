@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Lightning Browser</string>
+    <string name="add_group">Gruppe hinzufügen</string>
+    <string name="delete_group">Gruppe löschen</string>
+    <string name="edit_group">Gruppe bearbeiten</string>
+    <string name="app_details">App-Details</string>
+    <string name="apps_hidden">- Versteckt</string>
+
+    <string name="bookmarks_title">Lesezeichen</string>
+    <string name="tabs_title">Aktive Tabs</string>
+    <string name="tabs_info">Aktive Tabs können im Hintergrund Audio abspielen und aufzeichnen, sofern sie nicht geschlossen sind</string>
+
+    <!--  Tooltips  -->
+    <string name="tip_kill_process">Webseite vollständig anhalten</string>
+    <string name="tip_launch_out">Einmal im eigenen Fenster starten</string>
+
+    <string name="tip_info_website">Informationen zum Hinzufügen von Websites</string>git
+
+    <string name="tip_stop_editing">Bearbeitungsmodus deaktivieren</string>
+    <string name="tip_select_all">Alle sichtbaren Apps auswählen / abwählen</string>
+
+    <string name="tip_uninstall">Deinstallieren / Entfernen</string>
+    <string name="tip_uninstall_bulk">Alle Ausgewählten Deinstallieren / Entfernen</string>
+    <string name="tip_info">Android-App-Info</string>
+    <string name="tip_change_icon">Symbol ändern</string>
+
+    <string name="tip_save_settings">Alle Einstellungen &amp; Gruppierungen sichern</string>
+    <string name="tip_load_settings">Alle Einstellungen &amp; Gruppierungen wiederherstellen</string>
+
+    <string name="tip_hide">Diese App ausblenden</string>
+    <string name="tip_show">Diese App einblenden</string>
+
+    <!--  Toasts  -->
+    <string name="moved_hidden">Verschoben nach</string>
+    <string name="moved_hidden_bold">Versteckte Gruppe</string>
+    <string name="moved_shown">Verschoben nach</string>
+    <string name="refreshed_icon">Aktualisiere Symbol…</string>
+
+    <!--  Web Presets  -->
+    <string name="preset_google" translatable="false">google.com</string>
+    <string name="preset_youtube" translatable="false">youtube.com</string>
+    <string name="preset_discord" translatable="false">discord.com/app</string>
+    <string name="preset_spotify" translatable="false">open.spotify.com</string>
+    <string name="preset_tidal" translatable="false">listen.tidal.com</string>
+    <string name="preset_apkmirror" translatable="false">apkmirror.com</string>
+    <string name="preset_apkpure" translatable="false">apkpure.com</string>
+
+    <string name="notification_title_n">Lightning-Browser: Keine Webseiten werden ausgeführt</string>
+    <string name="notification_title_s">Lightning-Browser: Eine Webseite wird ausgeführt</string>
+    <string name="notification_title_p">Lightning-Browser: %1$d Webseiten 
+werden ausgeführt</string>
+    <string name="notification_content">Diese Benachrichtigung sorgt dafür den Hintergrundton Ihrer Webseiten reibungslos abzuspielen.</string>
+
+    <!-- Addons -->
+    <string name="addons_install">Installieren</string>
+    <string name="addons_update">Aktualisieren</string>
+    <string name="addons_activate">Aktivieren</string>
+    <string name="addons_uninstall">Entfernen</string>
+
+    <!--  Browser Tooltips  -->
+    <string name="web_back">Zurück navigieren</string>
+    <string name="web_forward">Vorwärts navigieren</string>
+    <string name="web_reload">Diese Seite aktualisieren</string>
+    <string name="web_exit">Registerkarte minimieren</string>
+    <string name="web_hide_bar">Obere Leiste ausblenden</string>
+    <string name="web_add_bookmark">Seite zu Lesezeichen hinzufügen</string>
+    <string name="web_remove_bookmark">Lesezeichen entfernen</string>
+    <string name="web_cancel">Abbrechen</string>
+    <string name="web_confirm">Bestätigen &amp; Los</string>
+    <string name="web_close">Schließen</string>
+
+    <!-- Browser -->
+    <string name="web_download_started">Download läuft</string>
+    <string name="web_download_finished">Download abgeschlossen</string>
+
+    <string name="web_apk_prompt_title">APK-Datei heruntergeladen</string>
+    <string name="web_apk_prompt_message_pre">Download abgeschlossen %1$s</string>
+    <string name="web_apk_prompt_message">Diese APK installieren oder im Download-Ordner speichern?\n \nBeachten Sie dass heruntergeladene Dateien schädlich sein könnten!</string>
+    <string name="web_apk_prompt_install">Installieren</string>
+    <string name="web_apk_prompt_move">Speichern</string>
+    <string name="web_apk_prompt_delete">Löschen</string>
+    <string name="extension_prompt_title">Web-Erweiterungen verwalten</string>
+    <string name="extension_prompt_hint">Erweiterungen von Firefox-Addons abrufen</string>
+
+    <string name="web_search">Suchbegriff oder URL eingeben</string>
+
+    <!-- Misc. -->
+    <string name="warning">Wichtige Informationen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="understood">Verstanden!</string>
+    <string name="confirm">Bestätigen</string>
+    <string name="next">Weiter</string>
+
+    <!-- Gecko -->
+    <string name="before_unload_message">Sie werden aufgefordert das Verlassen der Webseite zu bestätigen. Eingegebene Daten werden möglicherweise nicht gespeichert.</string>
+    <string name="before_unload_title">Sind Sie sicher?</string>
+    <string name="before_unload_leave_page">Seite verlassen</string>
+    <string name="before_unload_stay">Auf der Seite bleiben</string>
+
+    <string name="repost_confirm_message">Um diese Seite anzuzeigen muss GeckoViewExample Informationen über zuvor durchgeführten Aktionen (z. B. eine Suche oder Bestellbestätigung) wiederholen.</string>
+    <string name="repost_confirm_title">Sind Sie sicher?</string>
+    <string name="repost_confirm_resend">Erneut senden</string>
+    <string name="repost_confirm_cancel">Abbrechen</string>
+
+    <string name="username">Benutzername</string>
+    <string name="password">Passwort</string>
+    <string name="clear_field">Löschen</string>
+
+    <string name="wait">Warten</string>
+    <string name="stop">Stopp</string>
+
+
+    <!--  Updater  -->
+    <string name="update_title">Ein Update ist verfügbar!</string>
+    <string name="update_content">Sie können in dieser App von Version %1$s auf %2$s aktualisieren.</string>
+    <string name="update_button">Weiter</string>
+    <string name="update_skip_button">Dieses Update überspringen</string>
+    <string name="update_skip_toast">Übersprungene Version</string>
+
+    <string name="update_downloading_title">Neueste Version von %s wird heruntergeladen</string>
+    <string name="update_downloading_content">Sie sollten in Kürze eine Installationsaufforderung erhalten.\n \nBei auftretenden Problemen können Sie es in den Einstellungen erneut versuchen.</string>
+    <string name="update_hide_button">Ausblenden</string>
+
+    <string name="update_failed_title">Fehler beim Herunterladen des Pakets!</string>
+    <string name="update_failed_content">Stellen Sie sicher, dass Sie über eine gute Internetverbindung verfügen, und versuchen Sie es später noch einmal.</string>
+
+    <string name="update_skip_title">Aktualisierung auf Version %1$s überspringen?</string>
+    <string name="update_skip_content">Sie werden nicht erneut über dieses Update benachrichtigt.\n \nUpdates werden dringend empfohlen und können wichtige Korrekturen enthalten.\n \nWenn Sie dieses Update vermeiden weil es Probleme verursacht melden Sie diese unter github.com/ threethan/Lightning Launcher\n \nSIE KÖNNEN SPÄTER IN DEN EINSTELLUNGEN AKTUALISIEREN!</string>
+    <string name="update_skip_confirm_button">Ich verstehe, überspringen</string>
+    <string name="update_skip_cancel_button">Einfach verwerfen</string>
+
+
+</resources>
