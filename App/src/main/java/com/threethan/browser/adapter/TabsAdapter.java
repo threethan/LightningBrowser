@@ -66,10 +66,29 @@ public class TabsAdapter extends ArrayListAdapter<String, TabsAdapter.TabHolder>
             wrapperActivity.bookmarkManager.removeBookmark(url);
         });
 
-        holder.view.setOnClickListener(v -> wrapperActivity.open(tabIdOrUrl));
+        holder.mainBtn.setOnClickListener(v -> wrapperActivity.open(tabIdOrUrl));
+        holder.mainBtn.setOnLongClickListener(v -> {
+            if (holder.closeBtn.getVisibility() == View.VISIBLE) {
+                holder.closeBtn.callOnClick();
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        // Fix focus oddities
+        View lastFocusable = null;
+        for (int i = 0; i < holder.buttonsViewGroup.getChildCount(); i++) {
+            holder.buttonsViewGroup.getChildAt(i).setNextFocusLeftId(
+                    lastFocusable != null ? lastFocusable.getId() : holder.mainBtn.getId()
+            );
+            if (holder.buttonsViewGroup.getChildAt(i).isFocusable())
+                lastFocusable = holder.buttonsViewGroup.getChildAt(i);
+        }
     }
-    protected static class TabHolder extends RecyclerView.ViewHolder {
+    public static class TabHolder extends RecyclerView.ViewHolder {
         final View view;
+        final View mainBtn;
 
         final TextView titleText;
         final TextView urlText;
@@ -78,7 +97,8 @@ public class TabsAdapter extends ArrayListAdapter<String, TabsAdapter.TabHolder>
         final View bookmarkAddBtn;
         final View bookmarkRemBtn;
         final ImageView favicon;
-        public TabHolder(@NonNull View itemView) {
+        final ViewGroup buttonsViewGroup;
+        protected TabHolder(@NonNull View itemView) {
             super(itemView);
             view = itemView;
             titleText = itemView.findViewById(R.id.title);
@@ -87,8 +107,10 @@ public class TabsAdapter extends ArrayListAdapter<String, TabsAdapter.TabHolder>
             renameBtn = itemView.findViewById(R.id.rename);
             bookmarkAddBtn = itemView.findViewById(R.id.addBookmark);
             bookmarkRemBtn = itemView.findViewById(R.id.removeBookmark);
+            mainBtn = itemView.findViewById(R.id.main);
             favicon = itemView.findViewById(R.id.favicon);
             favicon.setClipToOutline(true);
+            buttonsViewGroup = itemView.findViewById(R.id.buttons);
         }
     }
 }

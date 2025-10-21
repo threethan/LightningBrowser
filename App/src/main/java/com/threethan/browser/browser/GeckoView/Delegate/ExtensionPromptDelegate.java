@@ -26,29 +26,23 @@ import org.mozilla.geckoview.WebExtensionController;
 
 public class ExtensionPromptDelegate implements WebExtensionController.PromptDelegate {
     final static String EXTENSIONS_URL = "https://addons.mozilla.org/firefox/extensions/";
-    /** @noinspection deprecation*/
+
     @Nullable
     @Override
-    public GeckoResult<AllowOrDeny> onInstallPrompt(@NonNull WebExtension extension) {
+    public GeckoResult<AllowOrDeny> onOptionalPrompt(@NonNull WebExtension extension, @NonNull String[] permissions, @NonNull String[] origins, @NonNull String[] dataCollectionPermissions) {
         return GeckoResult.fromValue(AllowOrDeny.ALLOW);
     }
 
     @Nullable
     @Override
-    public GeckoResult<AllowOrDeny> onInstallPrompt(@NonNull WebExtension extension, @NonNull String[] permissions, @NonNull String[] origins) {
+    public GeckoResult<AllowOrDeny> onUpdatePrompt(@NonNull WebExtension extension, @NonNull String[] newPermissions, @NonNull String[] newOrigins, @NonNull String[] newDataCollectionPermissions) {
         return GeckoResult.fromValue(AllowOrDeny.ALLOW);
     }
 
     @Nullable
     @Override
-    public GeckoResult<AllowOrDeny> onOptionalPrompt(@NonNull WebExtension extension, @NonNull String[] permissions, @NonNull String[] origins) {
-        return GeckoResult.fromValue(AllowOrDeny.ALLOW);
-    }
-
-    @Nullable
-    @Override
-    public GeckoResult<AllowOrDeny> onUpdatePrompt(@NonNull WebExtension currentlyInstalled, @NonNull WebExtension updatedExtension, @NonNull String[] newPermissions, @NonNull String[] newOrigins) {
-        return GeckoResult.fromValue(AllowOrDeny.ALLOW);
+    public GeckoResult<WebExtension.PermissionPromptResponse> onInstallPromptRequest(@NonNull WebExtension extension, @NonNull String[] permissions, @NonNull String[] origins, @NonNull String[] dataCollectionPermissions) {
+        return GeckoResult.fromValue(new WebExtension.PermissionPromptResponse(true, true, false));
     }
 
     public void showList() {
@@ -86,27 +80,58 @@ public class ExtensionPromptDelegate implements WebExtensionController.PromptDel
                                         parent,
                                         false);
                     }
-                    final WebExtensionController extentionController = BrowserService.sRuntime.getWebExtensionController();
+                    final WebExtensionController extensionController = BrowserService.sRuntime.getWebExtensionController();
                     View finalView = view;
 
                     final boolean[] enabled = {item.metaData.disabledFlags == 0};
-                    view.setOnClickListener(v -> {
+
+                    View main = view.findViewById(R.id.main);
+                    View options = view.findViewById(R.id.options);
+
+                    View disabledOverlay = view.findViewById(R.id.disabledOverlay);
+                    disabledOverlay.setVisibility(enabled[0] ? View.GONE : View.VISIBLE);
+                    options.setVisibility(item.metaData.optionsPageUrl == null || ! enabled[0] ? View.GONE : View.VISIBLE);
+                    main.setOnClickListener(v -> {
                         if (enabled[0])
-                            extentionController.disable(item, WebExtensionController.EnableSource.USER);
+                            extensionController.disable(item, WebExtensionController.EnableSource.USER);
                         else
-                            extentionController.enable(item, WebExtensionController.EnableSource.USER);
+                            extensionController.enable(item, WebExtensionController.EnableSource.USER);
                         enabled[0] = !enabled[0];
-                        finalView.setAlpha(enabled[0] ? 1f : 0.5f);
+                        disabledOverlay.setVisibility(enabled[0] ? View.GONE : View.VISIBLE);
+
+                        options.setVisibility(enabled[0] ? View.VISIBLE : View.GONE);
+                        options.postDelayed(() ->
+                            options.setVisibility(item.metaData.optionsPageUrl == null || ! enabled[0] ? View.GONE : View.VISIBLE)
+                        , 250);
+
+                        Dialog.toast(item.metaData.name,
+                                getContext().getString(enabled[0] ? R.string.enabled : R.string.disabled),
+                                false);
+                    });
+                    main.setOnLongClickListener(v -> {
+                        if (item.metaData.amoListingUrl != null) {
+                            ((BrowserActivity) activity).loadUrl(item.metaData.amoListingUrl);
+                            dialog.dismiss();
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    view.setOnFocusChangeListener((view1, hasFocus) -> {
+                        if (hasFocus) {
+                            main.requestFocus();
+                        }
                     });
 
                     view.findViewById(R.id.uninstall).setOnClickListener(v -> {
-                        extentionController.uninstall(item);
+                        extensionController.uninstall(item);
                         finalView.setVisibility(View.GONE);
                         dialog.dismiss();
                         showList();
                     });
-                    view.findViewById(R.id.options).setOnClickListener(v -> {
-                        if (activity instanceof BrowserActivity) {
+                    options.setOnClickListener(v -> {
+                        if (activity instanceof BrowserActivity
+                                && item.metaData.optionsPageUrl != null) {
                             ((BrowserActivity) activity).loadUrl(item.metaData.optionsPageUrl);
                             dialog.dismiss();
                         }
@@ -123,15 +148,13 @@ public class ExtensionPromptDelegate implements WebExtensionController.PromptDel
                 .then(value -> {
                     assert value != null;
                     Log.v("WEBEXTLIST", value.toString());
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        value.removeIf(webExtension -> webExtension.id.equals("fixes@internal.ext"));
-                    }
+                    value.removeIf(webExtension -> webExtension.id.equals("fixes@internal.ext"));
                     adapter.addAll(value);
 
                     dialog.show();
 
                     ListView lv = dialog.findViewById(R.id.listView);
-                    lv.setAdapter(adapter);
+                    lv.post(() -> lv.setAdapter(adapter));
                     return null;
                 });
     }

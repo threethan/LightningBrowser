@@ -23,6 +23,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/bkg_button_web"
             android:src="@drawable/web_back"
@@ -36,8 +37,8 @@
             android:layout_width="39dp"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/bkg_button_web"
             android:src="@drawable/web_forward"
@@ -51,7 +52,9 @@
             android:layout_width="39dp"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
-            android:layout_margin="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/bkg_button_web"
             android:src="@drawable/web_refresh"
             android:tooltipText="@string/web_reload"
@@ -66,6 +69,7 @@
             android:layout_weight="1"
             android:orientation="horizontal"
             android:paddingEnd="0dp"
+            android:background="@drawable/bkg_button_web"
             tools:ignore="RtlSymmetry,UselessParent">
 
             <ImageView
@@ -170,19 +174,6 @@
             tools:ignore="UnusedAttribute" />
 
         <ImageButton
-            android:id="@+id/hideBar"
-            android:layout_width="39dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/bkg_button_web"
-            android:src="@drawable/web_up"
-            android:tooltipText="@string/web_hide_bar"
-            tools:ignore="UnusedAttribute" />
-
-        <ImageButton
             android:id="@+id/exit"
             android:layout_width="39dp"
             android:layout_height="match_parent"
@@ -197,19 +188,21 @@
 
     </LinearLayout>
 
-    <ProgressBar
+
+    <FrameLayout
         android:id="@+id/loading"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_marginTop="-2dp"
-        android:indeterminate="true"
-        android:indeterminateTint="#E4E4E4"
-        android:maxHeight="5dp"
-        android:minHeight="5dp"
-        android:scaleY="4"
-        android:visibility="gone" />
-
+        android:visibility="gone">
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_gravity="center_vertical|fill_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:indeterminate="true"
+            android:indeterminateTint="#E4E4E4" />
+    </FrameLayout>
     <LinearLayout
         android:id="@+id/topBarEdit"
         android:layout_width="match_parent"
@@ -220,7 +213,7 @@
         android:visibility="gone">
 
 
-        <EditText
+        <com.threethan.browser.wrapper.EditTextWatched
             android:id="@+id/urlEdit"
             style="@style/SettingButtonLabel"
             android:layout_width="0dp"
@@ -233,7 +226,20 @@
             android:inputType="textUri"
             android:selectAllOnFocus="true"
             android:singleLine="true"
+            android:textColorHint="#8FFF"
             tools:text="discord.com/app" />
+
+        <ImageButton
+            android:id="@+id/clear"
+            android:layout_width="39dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_clear"
+            tools:ignore="DuplicateIds,UnusedAttribute" />
 
         <ImageButton
             android:id="@+id/cancel"

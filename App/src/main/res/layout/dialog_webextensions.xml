@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.threethan.browser.browser.CursorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/bkg_dialog"
@@ -7,7 +7,7 @@
     android:padding="20dp">
 
     <View
-        android:layout_width="350dp"
+        android:layout_width="450dp"
         android:layout_height="0dp" />
 
     <ImageView
@@ -28,9 +28,8 @@
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-
-    </ListView>
+        android:layout_weight="1"
+        android:descendantFocusability="afterDescendants"/>
 
     <TextView
 
@@ -45,4 +44,4 @@
         <requestFocus/>
     </TextView>
 
-</com.threethan.browser.browser.CursorLayout>
+</LinearLayout>

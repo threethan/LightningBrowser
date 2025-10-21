@@ -2,7 +2,6 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_hovered="true" android:drawable="@drawable/bkg_button_web_hover" />
-    <item android:state_focused="true" android:drawable="@drawable/bkg_button_web_hover" />
     <item android:state_pressed="true" android:drawable="@drawable/bkg_button_web_press" />
     <item android:drawable="@drawable/bkg_button_web_default" />
 </selector>

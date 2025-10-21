@@ -2,58 +2,76 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
-    android:layout_marginStart="2dp"
-    android:layout_marginTop="2dp"
-    android:layout_marginBottom="5dp"
-    android:background="@drawable/bkg_button"
-    android:orientation="horizontal">
+    android:layout_height="45dp"
+    android:layout_marginBottom="10dp"
+    android:orientation="horizontal"
+    android:focusable="false">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="0dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginTop="2dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        tools:ignore="TextSizeCheck">
-
-        <TextView
-            android:id="@+id/name"
-            style="@style/SettingsText"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+        <LinearLayout
+            android:id="@+id/main"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:singleLine="true"
-            android:textSize="16sp"
-            tools:text="Extension Name" />
+            android:layout_height="match_parent"
+            android:background="@drawable/bkg_button_chip"
+            android:gravity="start|center_vertical"
+            android:orientation="vertical"
+            android:paddingTop="0dp"
+            tools:ignore="TextSizeCheck">
 
-        <TextView
-            android:id="@+id/info"
-            style="@style/SettingsText"
+            <TextView
+                android:id="@+id/name"
+                style="@style/SettingsText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1sp"
+                android:layout_marginBottom="-3sp"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:textSize="16sp"
+                tools:text="Extension Name" />
+
+            <TextView
+                android:id="@+id/info"
+                style="@style/SettingsText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="-5dp"
+                android:alpha="0.5"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:textSize="11sp"
+                tools:text="It's a cool extension that does many things!!" />
+        </LinearLayout>
+
+
+        <View
+            android:id="@+id/disabledOverlay"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.5"
-            android:gravity="center_vertical"
-            android:singleLine="true"
-            android:textSize="11sp"
-            tools:text="It's a cool extension that does many things!!" />
-    </LinearLayout>
+            android:layout_gravity="center"
+            android:layout_height="match_parent"
+            android:background="@drawable/bkg_disabled_overlay"
+            />
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/options"
-        android:layout_width="30dp"
+        android:layout_width="50dp"
         android:layout_height="match_parent"
-        android:layout_marginEnd="5dp"
-        android:background="@drawable/bkg_hover_button"
+        android:layout_marginStart="5dp"
+        android:background="@drawable/bkg_button"
+        android:padding="10dp"
         android:src="@drawable/ic_config" />
 
     <ImageView
         android:id="@+id/uninstall"
-        android:layout_width="30dp"
+        android:layout_width="50dp"
         android:layout_height="match_parent"
-        android:layout_marginEnd="5dp"
-        android:background="@drawable/bkg_hover_button"
+        android:layout_marginStart="5dp"
+        android:background="@drawable/bkg_button"
+        android:padding="10dp"
         android:src="@drawable/ic_uninstall" />
 
 </LinearLayout>

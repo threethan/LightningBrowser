@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,6 +19,8 @@ import com.threethan.browser.helper.Keyboard;
 import com.threethan.browser.lib.StringLib;
 import com.threethan.browser.updater.BrowserUpdater;
 import com.threethan.browser.wrapper.BoundActivity;
+import com.threethan.browser.wrapper.EditTextWatched;
+
 public class BrowserActivity extends BoundActivity {
     private BrowserWebView w;
     TextView urlPre;
@@ -36,8 +37,10 @@ public class BrowserActivity extends BoundActivity {
     protected final BookmarkManager bookmarkManager = new BookmarkManager(this);
     private boolean isEphemeral;
     private boolean isTab;
-    private boolean isTopBarHidden;
+    private boolean isTopBarForcablyHidden;
     private final String DEFAULT_URL = "https://www.google.com/";
+    private CursorLayout container;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +81,7 @@ public class BrowserActivity extends BoundActivity {
         Log.v("Lightning Browser", "... with url " + currentUrl + (isTab ? ", is a tab":", not a tab") + ", assigned id "+tabId);
 
         if (!isTab) {
-            isTopBarHidden = true;
+            isTopBarForcablyHidden = true;
             hideTopBar();
         }
 
@@ -137,16 +140,17 @@ public class BrowserActivity extends BoundActivity {
             bookmarkManager.removeBookmark(currentUrl);
         });
 
-        // Hide top bar
-        View hideBar = findViewById(R.id.hideBar);
-        hideBar.setOnClickListener(v -> {
-            isTopBarHidden = true;
-            hideTopBar();
-        });
-
         // Edit URL
         View urlLayout = findViewById(R.id.urlLayout);
-        EditText urlEdit = findViewById(R.id.urlEdit);
+        EditTextWatched urlEdit = findViewById(R.id.urlEdit);
+        View clearUrl = findViewById(R.id.clear);
+        View confirm = findViewById(R.id.confirm);
+        urlEdit.setOnEdited((string) -> {
+            clearUrl.setVisibility(string.isEmpty() ? View.GONE : View.VISIBLE);
+            confirm.setVisibility(string.isEmpty() ? View.GONE : View.VISIBLE);
+        });
+        clearUrl.setOnClickListener((view) -> urlEdit.setText(""));
+
         View topBar = findViewById(R.id.topBar);
         View topBarEdit = findViewById(R.id.topBarEdit);
         urlLayout.setOnClickListener((view) -> {
@@ -164,7 +168,7 @@ public class BrowserActivity extends BoundActivity {
             }
             return false;
         });
-        topBarEdit.findViewById(R.id.confirm).setOnClickListener((view) -> {
+        confirm.setOnClickListener((view) -> {
             String nUrl = urlEdit.getText().toString();
 
             nUrl = StringLib.toValidUrl(nUrl);
@@ -213,9 +217,9 @@ public class BrowserActivity extends BoundActivity {
     }
 
     public void showTopBar() {
+        if (isTopBarForcablyHidden) return;
         findViewById(R.id.topBar).setVisibility(View.VISIBLE);
         findViewById(R.id.topBarEdit).setVisibility(View.GONE);
-        isTopBarHidden = false;
     }
     public void hideTopBar() {
         findViewById(R.id.topBar).setVisibility(View.GONE);
@@ -251,7 +255,7 @@ public class BrowserActivity extends BoundActivity {
 
     @Override
     public void onBackPressed() {
-        if (isTopBarHidden) {
+        if (isTopBarForcablyHidden) {
             showTopBar();
         } else if (findViewById(R.id.topBarEdit).getVisibility() == View.VISIBLE)
             findViewById(R.id.cancel).callOnClick();
@@ -275,6 +279,10 @@ public class BrowserActivity extends BoundActivity {
         super.onDestroy();
     }
     public void loadUrl(String url) {
+        if (url == null) {
+            Log.w("Lightning Browser", "Tried to load null URL");
+            return;
+        }
         w.loadUrl(url);
         updateButtonsAndUrl(url);
     }
@@ -296,7 +304,7 @@ public class BrowserActivity extends BoundActivity {
         }
 
         w = wService.getWebView(this);
-        CursorLayout container = findViewById(R.id.container);
+        container = findViewById(R.id.container);
         container.addView(w);
         container.targetView = w;
 
@@ -313,5 +321,46 @@ public class BrowserActivity extends BoundActivity {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) onBackPressed();
         return true;
+    }
+
+    private int accumulatedScrollY = 0;
+    private boolean topBarOnCooldown = false;
+    public void handleScrollChanged(int deltaY) {
+        if (topBarOnCooldown || isTopBarForcablyHidden) return;
+
+        final int THRESH = 50;
+
+        accumulatedScrollY += deltaY;
+
+        boolean hide;
+
+        if (accumulatedScrollY < -THRESH) {
+            hide = false;
+            accumulatedScrollY = -THRESH;
+        } else if (accumulatedScrollY > THRESH) {
+            hide = true;
+            accumulatedScrollY = THRESH;
+        } else return;
+
+        int topBarNewVis = hide ? View.GONE : View.VISIBLE;
+        if (findViewById(R.id.topBar).getVisibility() != topBarNewVis) {
+            if (topBarNewVis == View.VISIBLE) {
+                showTopBar();
+                container.scrollBy(0, -topLayoutDp());
+            } else {
+                hideTopBar();
+                container.scrollBy(0, topLayoutDp());
+            }
+            topBarOnCooldown = true;
+            container.postDelayed(() -> {
+                accumulatedScrollY = 0;
+                topBarOnCooldown = false;
+            }, 1000);
+        }
+    }
+
+    private int topLayoutDp() {
+        float scale = getResources().getDisplayMetrics().density;
+        return (int) (40 * scale + 0.5f);
     }
 }

@@ -3,12 +3,10 @@ package com.threethan.browser.helper;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.preference.PreferenceManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.datastore.migrations.SharedPreferencesView;
 import androidx.datastore.preferences.core.MutablePreferences;
 import androidx.datastore.preferences.core.Preferences;
@@ -92,7 +90,6 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
      * <p>
      * You may wish to set 'asyncWrite' to false before this operation.
      */
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public void migrateFrom(SharedPreferences sharedPreferences) {
         if (sharedPreferences instanceof DataStoreEditor)
             throw new InvalidParameterException(
@@ -108,7 +105,6 @@ public class DataStoreEditor implements SharedPreferences, SharedPreferences.Edi
      * You should include your own mechanism to avoid running this more than once.
      * You may wish to set 'asyncWrite' to false before this operation.
      */
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public void migrateDefault(Context context) {
         //noinspection deprecation
         migrateFrom(PreferenceManager.getDefaultSharedPreferences(context));

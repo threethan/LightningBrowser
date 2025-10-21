@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.threethan.browser.browser.BrowserActivity;
+import com.threethan.browser.browser.GeckoView.CustomScrollDelegate;
 
 import org.mozilla.geckoview.AllowOrDeny;
 import org.mozilla.geckoview.GeckoResult;
@@ -13,14 +14,16 @@ import org.mozilla.geckoview.GeckoSessionSettings;
 import java.util.List;
 
 public class CustomNavigationDelegate implements GeckoSession.NavigationDelegate {
+    private final CustomScrollDelegate mScrollDelegate;
     public boolean canGoBack = false;
     public boolean canGoForward = false;
     public String currentUrl = "";
 
     public BrowserActivity mActivity;
-    public CustomNavigationDelegate(BrowserActivity activity) {
+    public CustomNavigationDelegate(BrowserActivity activity, CustomScrollDelegate scrollDelegate) {
         super();
         this.mActivity = activity;
+        this.mScrollDelegate = scrollDelegate;
     }
     @Override
     public void onCanGoBack(@NonNull GeckoSession session, boolean canGoBack) {
@@ -52,6 +55,10 @@ public class CustomNavigationDelegate implements GeckoSession.NavigationDelegate
 
         this.currentUrl = request.uri;
         this.mActivity.updateButtonsAndUrl(currentUrl);
+
+        mScrollDelegate.resetScroll();
+        mActivity.showTopBar();
+
         return GeckoSession.NavigationDelegate.super.onLoadRequest(session, request);
     }
 }

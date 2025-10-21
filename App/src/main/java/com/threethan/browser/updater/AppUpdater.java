@@ -183,12 +183,6 @@ public abstract class AppUpdater extends RemotePackageUpdater {
      * @param consumer Called asynchronously with the latest version of the app
      */
     public void checkAppLatestVersion(Consumer<String> consumer) {
-        //noinspection ConstantValue
-        if (!BuildConfig.FLAVOR.equals("sideload")) {
-            Log.i(TAG, "Skipping update check for Non-Sideload build");
-            if (consumer != null) consumer.accept(getInstalledVersion());
-            return;
-        }
         new Thread(() -> {
             try {
                 android.net.TrafficStats.setThreadStatsTag(5);

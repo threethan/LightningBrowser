@@ -88,20 +88,22 @@ public class BrowserWebView extends GeckoView {
         sessionSettings.setUseTrackingProtection(true);
 
         session.setPriorityHint(GeckoSession.PRIORITY_HIGH);
-
-        navigationDelegate = new CustomNavigationDelegate(mActivity);
         historyDelegate = new CustomHistoryDelgate(mActivity);
         progressDelegate = new CustomProgressDelegate(mActivity);
         promptDelegate = new CustomPromptDelegate(mActivity);
         contentDelegate = new CustomContentDelegate(mActivity);
         permissionDelegate = new CustomPermissionDelegate(mActivity);
 
-        session.setNavigationDelegate(navigationDelegate);
+        CustomScrollDelegate scrollDelegate = new CustomScrollDelegate(mActivity);
+        navigationDelegate = new CustomNavigationDelegate(mActivity, scrollDelegate);
+
         session.setHistoryDelegate(historyDelegate);
         session.setPermissionDelegate(permissionDelegate);
         session.setProgressDelegate(progressDelegate);
         session.setContentDelegate(contentDelegate);
         session.setPromptDelegate(promptDelegate);
+        session.setScrollDelegate(scrollDelegate);
+        session.setNavigationDelegate(navigationDelegate);
 
         setSession(session);
         Objects.requireNonNull(mSession).getCompositorController().setClearColor(0xFF2A2A2E);

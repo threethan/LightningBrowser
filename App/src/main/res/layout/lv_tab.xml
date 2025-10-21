@@ -2,115 +2,129 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="40sp"
-    android:layout_marginBottom="5dp"
-    android:background="@drawable/bkg_button"
-    android:nextFocusRight="@id/buttons"
-    android:orientation="horizontal"
-    android:paddingStart="6dp"
-    android:paddingEnd="7dp"
+    android:layout_marginBottom="10dp"
+    android:baselineAligned="false"
     android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <ImageView
-        android:id="@+id/favicon"
-        android:layout_width="28sp"
-        android:layout_height="28sp"
-        android:background="@drawable/bkg_favicon"
-        android:scaleType="fitCenter"
-        android:src="@drawable/web_no_favicon" />
+    android:clipToPadding="false"
+    android:orientation="horizontal">
 
     <LinearLayout
+        android:id="@+id/main"
+
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="-1dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical"
+        android:orientation="horizontal"
+        android:background="@drawable/bkg_button_chip"
+        android:paddingStart="7dp"
+        android:paddingEnd="10dp"
         android:clipToPadding="false"
-        android:clipChildren="false">
+        android:clipChildren="false"
+        android:focusable="true">
 
-        <TextView
-            android:id="@+id/title"
-            style="@style/SettingsText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-1sp"
-            android:layout_marginBottom="-6sp"
-            android:gravity="center_vertical"
-            android:singleLine="true"
-            android:textSize="16sp"
-            tools:text="Google Search for Somethin" />
 
-        <TextView
-            android:id="@+id/url"
-            style="@style/SettingsText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.5"
-            android:gravity="center_vertical"
-            android:singleLine="true"
-            android:textSize="11sp"
-            android:layout_marginBottom="-5dp"
-            tools:text="https://google.com" />
+        <ImageView
+            android:id="@+id/favicon"
+            android:layout_width="28sp"
+            android:layout_height="28sp"
+            android:background="@drawable/bkg_favicon"
+            android:scaleType="fitCenter"
+            android:src="@drawable/web_no_favicon" />
 
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="-1dp"
+            android:layout_weight="1"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            tools:ignore="NestedWeights">
+
+            <TextView
+                android:id="@+id/title"
+                style="@style/SettingsText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-1sp"
+                android:layout_marginBottom="-6sp"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:textSize="16sp"
+                tools:text="Google Search for Somethin" />
+
+            <TextView
+                android:id="@+id/url"
+                style="@style/SettingsText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="-5dp"
+                android:alpha="0.5"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:textSize="11sp"
+                tools:text="https://google.com" />
+
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/buttons"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:descendantFocusability="afterDescendants"
+        android:orientation="horizontal"
+        android:nextFocusLeft="@id/main"
         android:focusable="true"
-        android:orientation="horizontal">
+        android:descendantFocusability="afterDescendants"
+        >
 
         <ImageButton
             android:id="@+id/addBookmark"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="5dp"
-            android:background="@drawable/bkg_button_web"
-            android:nextFocusLeft="@id/root"
+            android:background="@drawable/bkg_button_chip"
+            android:padding="10dp"
             android:src="@drawable/web_bookmark_off"
-            android:tooltipText="@string/web_close"
+            android:tooltipText="@string/web_add_bookmark"
             android:visibility="gone"
             tools:ignore="UnusedAttribute" />
 
         <ImageButton
             android:id="@+id/removeBookmark"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
             android:layout_marginStart="5dp"
-            android:background="@drawable/bkg_button_web"
-            android:nextFocusLeft="@id/root"
+            android:background="@drawable/bkg_button_chip"
+            android:padding="10dp"
             android:src="@drawable/web_bookmark_on"
-            android:tooltipText="@string/web_close"
+            android:tooltipText="@string/web_remove_bookmark"
             android:visibility="gone"
             tools:ignore="UnusedAttribute" />
 
         <ImageButton
             android:id="@+id/rename"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
             android:layout_marginStart="5dp"
-            android:background="@drawable/bkg_button_web"
+            android:background="@drawable/bkg_button_chip"
             android:src="@drawable/web_rename"
-            android:tooltipText="@string/web_close"
+            android:padding="10dp"
+            android:tooltipText="@string/web_rename"
             android:visibility="gone"
             tools:ignore="UnusedAttribute" />
 
         <ImageButton
             android:id="@+id/close"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
             android:layout_marginStart="5dp"
-            android:background="@drawable/bkg_button_web"
+            android:background="@drawable/bkg_button_chip"
+            android:padding="10dp"
             android:src="@drawable/web_close"
             android:tooltipText="@string/web_close"
             android:visibility="visible"
