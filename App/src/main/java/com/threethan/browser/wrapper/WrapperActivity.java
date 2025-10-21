@@ -72,9 +72,9 @@ public class WrapperActivity extends BoundActivity {
         bookmarkManager = new BookmarkManager(this);
         bookmarksAdapter = new BookmarksAdapter(this);
         bookmarksAdapter.setItems(new ArrayList<>(bookmarkManager.getBookmarks()));
-        RecyclerView bmarks = findViewById(R.id.bookmarkList);
-        bmarks.setLayoutManager(new LinearLayoutManager(this));
-        bmarks.setAdapter(bookmarksAdapter);
+        RecyclerView bookmarks = findViewById(R.id.bookmarkList);
+        bookmarks.setLayoutManager(new LinearLayoutManager(this));
+        bookmarks.setAdapter(bookmarksAdapter);
         bookmarksSection = findViewById(R.id.bookmarksSection);
         bookmarksSection.setVisibility(bookmarkManager.getBookmarks().isEmpty() ? View.GONE : View.VISIBLE);
 
@@ -100,6 +100,7 @@ public class WrapperActivity extends BoundActivity {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlOrTabId));
         intent.setClass(this, BrowserActivity.class);
         intent.putExtra("isTab", true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
     }
 }

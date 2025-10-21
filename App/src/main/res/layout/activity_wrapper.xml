@@ -19,10 +19,7 @@
         android:id="@+id/topBarEdit"
         android:layout_width="match_parent"
         android:layout_height="40sp"
-        android:background="@drawable/bkg_button"
-        android:orientation="horizontal"
-        android:paddingLeft="7dp"
-        android:paddingRight="7dp">
+        android:orientation="horizontal">
 
 
         <com.threethan.browser.wrapper.EditTextWatched
@@ -30,23 +27,23 @@
             style="@style/SettingButtonLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:background="@drawable/bkg_button_chip"
             android:ems="10"
             android:hint="@string/web_search"
             android:inputType="textUri"
             android:selectAllOnFocus="true"
-            android:textColorHint="#8FFF"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:textColorHint="#8FFF" />
 
         <ImageButton
             android:id="@+id/confirm"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="5dp"
-            android:background="@drawable/bkg_button_web"
+            android:background="@drawable/bkg_button_chip"
+            android:padding="10dp"
             android:src="@drawable/web_forward"
             android:tint="@color/color_button_icon"
             android:tooltipText="@string/web_confirm"

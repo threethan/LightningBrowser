@@ -33,6 +33,15 @@ public class BookmarkManager {
         return bookmarkTitlesByUrl.get(url);
     }
 
+    public void setBookmarkTitle(String url, String title) {
+        if (bookmarkTitlesByUrl.containsKey(url)) {
+            bookmarkTitlesByUrl.put(url, title);
+            dataStoreEditor.putString(KEY_BOOKMARK_TITLE_PREFIX+url, title);
+            Log.i("Bookmarks", "Bookmark Title Updated for url "+url+" to title "+title);
+            BrowserService.bookmarkUpdate();
+        }
+    }
+
     public void addBookmark(String url, String title) {
         bookmarkTitlesByUrl.put(url, title);
         dataStoreEditor.putStringSet(KEY_BOOKMARK_LIST, bookmarkTitlesByUrl.keySet());
