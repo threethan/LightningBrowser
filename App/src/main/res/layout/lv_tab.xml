@@ -20,6 +20,8 @@
         android:background="@drawable/bkg_button_chip"
         android:paddingStart="7dp"
         android:paddingEnd="10dp"
+        android:paddingVertical="0dp"
+        android:gravity="center_vertical"
         android:clipToPadding="false"
         android:clipChildren="false"
         android:focusable="true">
@@ -27,17 +29,17 @@
 
         <ImageView
             android:id="@+id/favicon"
-            android:layout_width="28sp"
-            android:layout_height="28sp"
+            android:layout_width="29sp"
+            android:layout_height="29sp"
             android:background="@drawable/bkg_favicon"
-            android:scaleType="fitCenter"
+            android:scaleType="fitXY"
             android:src="@drawable/web_no_favicon" />
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="-1dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="-3dp"
             android:layout_weight="1"
             android:clipChildren="false"
             android:clipToPadding="false"

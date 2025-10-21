@@ -346,10 +346,10 @@ public class BrowserActivity extends BoundActivity {
         if (findViewById(R.id.topBar).getVisibility() != topBarNewVis) {
             if (topBarNewVis == View.VISIBLE) {
                 showTopBar();
-                container.scrollBy(0, -topLayoutDp());
+                container.scrollBy(0, -getTopLayoutHeight());
             } else {
                 hideTopBar();
-                container.scrollBy(0, topLayoutDp());
+                container.scrollBy(0, getTopLayoutHeight());
             }
             topBarOnCooldown = true;
             container.postDelayed(() -> {
@@ -359,8 +359,8 @@ public class BrowserActivity extends BoundActivity {
         }
     }
 
-    private int topLayoutDp() {
+    private int getTopLayoutHeight() {
         float scale = getResources().getDisplayMetrics().density;
-        return (int) (40 * scale + 0.5f);
+        return (int) (42 * scale + 0.5f);
     }
 }

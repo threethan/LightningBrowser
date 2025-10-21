@@ -40,10 +40,11 @@ public class CursorLayout extends LinearLayout {
     private static final float CURSOR_FRICTION = 20f;
     private static final float MAX_CURSOR_SPEED = 20000.0f;
     private static final float MIN_CURSOR_SPEED = 180f;
+    private static final float SCROLL_START_MARGIN = 0.05f;
     private static int CURSOR_RADIUS = 0;
     private static float CURSOR_STROKE_WIDTH = 0f;
-    private static int SCROLL_START_PADDING = 80;
     private static final float SCROLL_MULT = 1f;
+    private static final float SCROLL_SPEED_THRESHOLD = MIN_CURSOR_SPEED * 2f;
     private static final float PHYSICS_SUBSTEPS = 1;
     private final Point cursorDirection = new Point(0, 0);
     private final PointF cursorPosition = new PointF(0.0f, 0.0f);
@@ -96,9 +97,9 @@ public class CursorLayout extends LinearLayout {
         cursorPosition.offset(cursorSpeed.x*deltaTime, cursorSpeed.y*deltaTime);
 
         if (cursorPosition.x < 0.0f) cursorPosition.x = 0.1f; // Cap to > 0 to avoid scroll lock-up
-        else if (cursorPosition.x > ((float) (getWidth() - 1)))  cursorPosition.x = (float) (getWidth() - 1);
+        else if (cursorPosition.x > ((float) (getMeasuredWidth() - 1)))  cursorPosition.x = (float) (getMeasuredWidth() - 1);
         if (cursorPosition.y < 0.0f) cursorPosition.y = 0.1f; // Cap to > 0 to avoid scroll lock-up
-        else if (cursorPosition.y > ((float) (getHeight() - 1))) cursorPosition.y = (float) (getHeight() - 1);
+        else if (cursorPosition.y > ((float) (getMeasuredHeight() - 1))) cursorPosition.y = (float) (getMeasuredHeight() - 1);
         if (!tmpPointF.equals(cursorPosition)) {
             if (centerPressed) {
                 dispatchMotionEvent(cursorPosition.x, cursorPosition.y, MotionEvent.ACTION_MOVE); // Drag
@@ -110,34 +111,41 @@ public class CursorLayout extends LinearLayout {
                     hovering = true;
                 }
             }
-}
+        }
         if (targetView != null) {
-            try {
-                float deltaX = 0;
-                float deltaY = 0;
-                if (cursorPosition.y > ((float) (getHeight() - CursorLayout.SCROLL_START_PADDING))) {
-                    if (cursorSpeed.y > 0.0f) {
-                        deltaY += cursorPosition.y * deltaTime * SCROLL_MULT;
-                    }
-                } else if (cursorPosition.y < ((float) CursorLayout.SCROLL_START_PADDING) && cursorSpeed.y < 0.0f) {
-                    deltaY += cursorSpeed.y * deltaTime * SCROLL_MULT;
-                }
-                if (cursorPosition.x > ((float) (getWidth() - CursorLayout.SCROLL_START_PADDING))) {
-                    if (cursorSpeed.x > 0.0f) {
-                        deltaX += cursorSpeed.x * deltaTime * SCROLL_MULT;
-                    }
-                } else if (cursorPosition.x < ((float) CursorLayout.SCROLL_START_PADDING) && cursorSpeed.x < 0.0f) {
-                    deltaX += cursorSpeed.x * deltaTime * SCROLL_MULT;
-                }
-                if (deltaX != 0 || deltaY != 0)
-                    scrollTargetBy(deltaX, deltaY);
-            } catch (Exception e) {
-                Log.w("CursorLayout", "Exception during scroll", e);
-            }
+            checkScrollTarget(deltaTime);
         }
         post(this::updateCursor);
         visUpdate();
     }
+
+    private void checkScrollTarget(float deltaTime) {
+        try {
+            float deltaX = 0;
+            float deltaY = 0;
+            float mHeight = getMeasuredHeight();
+            float mWidth = getMeasuredWidth();
+            if (cursorPosition.y > (mHeight * (1f-SCROLL_START_MARGIN))) {
+                if (cursorSpeed.y > SCROLL_SPEED_THRESHOLD) {
+                    deltaY += cursorPosition.y * deltaTime * SCROLL_MULT;
+                }
+            } else if (cursorPosition.y < (mHeight * SCROLL_START_MARGIN) && cursorSpeed.y < -SCROLL_SPEED_THRESHOLD) {
+                deltaY += cursorSpeed.y * deltaTime * SCROLL_MULT;
+            }
+            if (cursorPosition.x > (mWidth * (1f-SCROLL_START_MARGIN))) {
+                if (cursorSpeed.x > SCROLL_SPEED_THRESHOLD) {
+                    deltaX += cursorSpeed.x * deltaTime * SCROLL_MULT;
+                }
+            } else if (cursorPosition.x < (mWidth * SCROLL_START_MARGIN) && cursorSpeed.x < -SCROLL_SPEED_THRESHOLD) {
+                deltaX += cursorSpeed.x * deltaTime * SCROLL_MULT;
+            }
+            if (deltaX != 0 || deltaY != 0)
+                scrollTargetBy(deltaX, deltaY);
+        } catch (Exception e) {
+            Log.w("CursorLayout", "Exception during scroll", e);
+        }
+    }
+
     private boolean centerPressed;
     private long downTime;
 
@@ -253,7 +261,6 @@ public class CursorLayout extends LinearLayout {
         defaultDisplay.getSize(point);
         CURSOR_RADIUS = (int) (point.x / 150f);
         CURSOR_STROKE_WIDTH = CURSOR_RADIUS / 5f;
-        SCROLL_START_PADDING = point.x / 15;
         this.post(() -> cursorPosition.y = getHeight() / 2f);
 
         // Drag&Drop can eat all input as we don't have a mouse on the system level
@@ -293,7 +300,7 @@ public class CursorLayout extends LinearLayout {
                 }
                 case KeyEvent.KEYCODE_DPAD_DOWN -> {
                     if (keyEvent.getAction() == 0) {
-                        if (this.cursorPosition.y >= ((float) getHeight()))
+                        if (this.cursorPosition.y >= ((float) getMeasuredHeight()))
                             return super.dispatchKeyEvent(keyEvent);
                         handleDirectionKeyEvent(keyEvent, -100, 1);
                     } else
@@ -311,7 +318,7 @@ public class CursorLayout extends LinearLayout {
                 }
                 case KeyEvent.KEYCODE_DPAD_RIGHT -> {
                     if (keyEvent.getAction() == 0) {
-                        if (this.cursorPosition.x >= ((float) getWidth()))
+                        if (this.cursorPosition.x >= ((float) getMeasuredWidth()))
                             return super.dispatchKeyEvent(keyEvent);
                         handleDirectionKeyEvent(keyEvent, 1, -100);
                     } else

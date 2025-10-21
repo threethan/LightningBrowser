@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -139,6 +140,13 @@ public class ExtensionPromptDelegate implements WebExtensionController.PromptDel
                     name.setText(item.metaData.name);
                     TextView info = view.findViewById(R.id.info);
                     info.setText(item.metaData.description);
+
+                    ImageView icon = view.findViewById(R.id.icon);
+                    try {
+                        icon.setImageBitmap(item.metaData.icon.getBitmap(64).poll(1000));
+                    } catch (Throwable e) {
+                        throw new RuntimeException(e);
+                    }
                     return view;
                 }
             };

@@ -21,7 +21,7 @@
         <item name="android:colorPrimary">#2a2a2c</item>
     </style>
     <style name="ThemeOverlay.Browser" parent="ThemeOverlay.Standard">
-        <item name="android:windowBackground">@drawable/bg_meta_darker</item>
+        <item name="android:windowBackground">#333</item>
     </style>
 
     <style name="Title">

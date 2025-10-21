@@ -70,8 +70,7 @@ public class CustomContentDelegate implements GeckoSession.ContentDelegate {
     @Override
     public void onFullScreen(@NonNull GeckoSession session, boolean fullScreen) {
         GeckoSession.ContentDelegate.super.onFullScreen(session, fullScreen);
-        if (fullScreen) mActivity.hideTopBar();
-        else mActivity.showTopBar();
+        mActivity.setFullScreenSession(fullScreen ? session : null);
     }
 
     @Override

@@ -9,12 +9,13 @@
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:descendantFocusability="afterDescendants"
         android:focusable="false"
         android:layerType="hardware"
         android:orientation="horizontal"
         android:paddingLeft="15dp"
+        android:paddingTop="4dp"
         android:paddingRight="15dp">
 
         <ImageButton
@@ -67,16 +68,18 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:layout_weight="1"
+            android:background="@drawable/bkg_button_web"
             android:orientation="horizontal"
             android:paddingEnd="0dp"
-            android:background="@drawable/bkg_button_web"
             tools:ignore="RtlSymmetry,UselessParent">
 
             <ImageView
                 android:id="@+id/favicon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="start|center_vertical"
                 android:layout_marginEnd="4sp"
+                android:scaleType="fitXY"
                 android:background="@drawable/bkg_favicon"
                 android:src="@drawable/web_no_favicon" />
 

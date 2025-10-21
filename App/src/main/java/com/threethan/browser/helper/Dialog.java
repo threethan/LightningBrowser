@@ -13,12 +13,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import com.threethan.browser.R;
-import com.threethan.browser.browser.BrowserActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
