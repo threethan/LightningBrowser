@@ -134,6 +134,9 @@
         \nYOU CAN UPDATE LATER FROM THE SETTINGS!</string>
     <string name="update_skip_confirm_button">I Understand, Skip It</string>
     <string name="update_skip_cancel_button">Just Dismiss</string>
+    <string name="web_rename">Rename</string>
+    <string name="enabled">enabled</string>
+    <string name="disabled">disabled</string>
 
 
 </resources>

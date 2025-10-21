@@ -12,7 +12,7 @@
         <item name="android:textSize">16sp</item>
 
         <item name="android:windowSplashScreenBackground" tools:ignore="NewApi">#333</item>
-        <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@drawable/lc_bkg_button</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@drawable/bkg_button</item>
 
     </style>
 

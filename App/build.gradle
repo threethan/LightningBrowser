@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     defaultConfig {
-        compileSdk=35
+        compileSdk=36
         minSdkVersion 24
         versionCode 1300
         versionName "1.3.0"
@@ -34,12 +34,9 @@ android {
 }
 ext {
     // https://maven.mozilla.org/?prefix=maven2/org/mozilla/geckoview/
-    geckoviewVersion = "129.0.20240819150008" // Newer versions have issues :(
+    geckoviewVersion = "144.0.20251009125714" // Newer versions have issues :(
 }
 dependencies {
-
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    //noinspection GradleDependency
     implementation "org.mozilla.geckoview:geckoview:${geckoviewVersion}"
     //noinspection GradleDependency
     implementation 'androidx.datastore:datastore-preferences-rxjava3:1.0.0'
