@@ -41,14 +41,14 @@
             android:singleLine="true" />
 
         <ImageButton
-            android:id="@+id/cancel"
+            android:id="@+id/confirm"
             android:layout_width="40dp"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="5dp"
-            android:alpha="0.5"
             android:background="@drawable/bkg_button_web"
             android:src="@drawable/web_forward"
+            android:tint="@color/color_button_icon"
             android:tooltipText="@string/web_confirm"
             android:visibility="visible"
             tools:ignore="UnusedAttribute" />

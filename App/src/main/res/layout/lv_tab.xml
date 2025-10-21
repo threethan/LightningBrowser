@@ -10,7 +10,9 @@
     android:nextFocusRight="@id/buttons"
     android:orientation="horizontal"
     android:paddingStart="6dp"
-    android:paddingEnd="7dp">
+    android:paddingEnd="7dp"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
     <ImageView
         android:id="@+id/favicon"
@@ -26,14 +28,17 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="-1dp"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:clipToPadding="false"
+        android:clipChildren="false">
 
         <TextView
             android:id="@+id/title"
             style="@style/SettingsText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="-4sp"
+            android:layout_marginTop="-1sp"
+            android:layout_marginBottom="-6sp"
             android:gravity="center_vertical"
             android:singleLine="true"
             android:textSize="16sp"
@@ -44,11 +49,11 @@
             style="@style/SettingsText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="-5dp"
             android:alpha="0.5"
             android:gravity="center_vertical"
             android:singleLine="true"
             android:textSize="11sp"
+            android:layout_marginBottom="-5dp"
             tools:text="https://google.com" />
 
     </LinearLayout>

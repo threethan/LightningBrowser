@@ -33,10 +33,9 @@ public class WrapperActivity extends BoundActivity {
 
         getWindow().setStatusBarColor(Color.parseColor("#11181f"));
 
-        View confirm = findViewById(R.id.cancel);
+        View confirm = findViewById(R.id.confirm);
         EditTextWatched searchText = findViewById(R.id.urlEdit);
-        searchText.setOnEdited((var) -> confirm.setAlpha(var.isEmpty() ? 0.5f : 1f));
-        searchText.setOnEdited((var) -> confirm.setFocusable(var.isEmpty()));
+        searchText.setOnEdited((var) -> confirm.setEnabled(!var.isEmpty()));
         searchText.setOnKeyListener((v, keyCode, event) -> {
             if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                 // Perform action on Enter key press
