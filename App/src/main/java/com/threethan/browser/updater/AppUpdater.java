@@ -1,7 +1,6 @@
 package com.threethan.browser.updater;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -9,19 +8,16 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.threethan.browser.helper.Dialog;
-import com.threethan.browser.lib.FileLib;
 import com.threethan.browser.R;
+import com.threethan.browser.helper.CustomDialog;
+import com.threethan.browser.lib.FileLib;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mozilla.geckoview.BuildConfig;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * General Purpose App Updater which check for and pulls updates from GitHub
@@ -33,8 +29,6 @@ public abstract class AppUpdater extends RemotePackageUpdater {
 
     private static final String URL_GITHUB_API_TEMPLATE =
             "https://api.github.com/repos/%s/releases/latest";
-
-    private final RequestQueue requestQueue;
 
     private static boolean updateAvailable = false;
 
@@ -71,35 +65,35 @@ public abstract class AppUpdater extends RemotePackageUpdater {
 
     /**
      * Gets the github repo of the app
-     * @return GitHub repo in the format myacct/my-app-repo
+     * @return GitHub repo in the format my-acct/my-app-repo
      */
     protected abstract String getGitRepo();
 
     public AppUpdater(Activity activity) {
         super(activity);
-        this.requestQueue = Volley.newRequestQueue(activity);
     }
 
+    private static boolean hasUpdateDialog = false;
     /**
      * Shows a dialog prompting the user to download & install a main app update
      * @param currentVersion Current launcher version name
      * @param newVersion New launcher version name
      */
-    private void showAppUpdateDialog(String currentVersion, String newVersion) {
+    protected void showAppUpdateDialog(String currentVersion, String newVersion) {
+        if (hasUpdateDialog) return;
         try {
-            AlertDialog.Builder updateDialogBuilder =
-                    new AlertDialog.Builder(activity, android.R.style.Theme_DeviceDefault_Dialog_Alert);
-            updateDialogBuilder.setTitle(R.string.update_title);
-            updateDialogBuilder.setMessage(activity.getString(R.string.update_content, currentVersion, newVersion));
-
-            updateDialogBuilder.setPositiveButton(R.string.update_button, (dialog, which) ->
-                    downloadPackage(getAppPackage(newVersion)));
-            updateDialogBuilder.setNegativeButton(R.string.update_skip_button, (dialog, which) -> {
-                dialog.dismiss();
-                skipAppUpdate(newVersion);
-            });
-
-            updateDialogBuilder.show();
+            new CustomDialog.Builder(activity)
+                    .setTitle(R.string.update_title)
+                    .setMessage(activity.getString(R.string.update_content, currentVersion, newVersion))
+                    .setPositiveButton(R.string.update_button, (dialog, which) ->
+                            downloadPackage(getAppPackage(newVersion)))
+                    .setNegativeButton(R.string.update_skip_button, (dialog, which) -> {
+                        dialog.dismiss();
+                        skipAppUpdate(newVersion);
+                    })
+                    .setOnDismissListener(d -> hasUpdateDialog = false)
+                    .show();
+            hasUpdateDialog = true;
         } catch (Exception ignored) {} // This is not critical, and may fail if the launcher window isn't visible
     }
 
@@ -108,7 +102,7 @@ public abstract class AppUpdater extends RemotePackageUpdater {
      * Shows updates even if skipped.
      * @return True if an update is available
      */
-    public static boolean isAppUpdateAvailible() {
+    public static boolean isAppUpdateAvailable() {
         return updateAvailable;
     }
 
@@ -130,8 +124,9 @@ public abstract class AppUpdater extends RemotePackageUpdater {
         PackageInfo packageInfo;
         try {
             packageInfo = packageManager.getPackageInfo(
-                    activity.getPackageName(), PackageManager.GET_ACTIVITIES);
+                    getAppPackageName(), PackageManager.GET_ACTIVITIES);
         } catch (PackageManager.NameNotFoundException e) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
             return null;
         }
@@ -141,8 +136,9 @@ public abstract class AppUpdater extends RemotePackageUpdater {
         PackageInfo packageInfo;
         try {
             packageInfo = packageManager.getPackageInfo(
-                    activity.getPackageName(), PackageManager.GET_ACTIVITIES);
+                    getAppPackageName(), PackageManager.GET_ACTIVITIES);
         } catch (PackageManager.NameNotFoundException e) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
             return 0;
         }
@@ -156,7 +152,7 @@ public abstract class AppUpdater extends RemotePackageUpdater {
     private void storeLatestVersionAndPromptUpdate(String newVersionName) {
         final String installedVersion = getInstalledVersion();
         if (!Objects.equals(newVersionName, installedVersion)) {
-            updateAvailable = false;
+            updateAvailable = true;
             if (newVersionName.equals(getIgnoredUpdateTag())) return;
             Log.v(TAG, "New version available!");
             showAppUpdateDialog(installedVersion, newVersionName);
@@ -164,7 +160,9 @@ public abstract class AppUpdater extends RemotePackageUpdater {
             Log.i(TAG, getAppPackageName()+ " is up to date");
             updateAvailable = false;
             // Clear downloaded APKs
-            FileLib.delete(activity.getExternalCacheDir()+"/"+APK_FOLDER);
+            try {
+                FileLib.delete(activity.getExternalCacheDir() + "/" + APK_FOLDER);
+            } catch (Exception ignored) {}
         }
     }
 
@@ -182,44 +180,53 @@ public abstract class AppUpdater extends RemotePackageUpdater {
 
     /**
      * Checks the latest version of the app
-     * @param callback Called asynchronously with the latest version of the app
+     * @param consumer Called asynchronously with the latest version of the app
      */
-    public void checkAppLatestVersion(Response.Listener<String> callback) {
-        StringRequest updateRequest = new StringRequest(
-                Request.Method.GET, String.format(URL_GITHUB_API_TEMPLATE, getGitRepo()),
-                (response -> handleUpdateResponse(response, callback)),
-                ((error) -> Log.w(TAG, "Couldn't get update info", error)));
-        requestQueue.add(updateRequest);
+    public void checkAppLatestVersion(Consumer<String> consumer) {
+        //noinspection ConstantValue
+        if (!BuildConfig.FLAVOR.equals("sideload")) {
+            Log.i(TAG, "Skipping update check for Non-Sideload build");
+            if (consumer != null) consumer.accept(getInstalledVersion());
+            return;
+        }
+        new Thread(() -> {
+            try {
+                android.net.TrafficStats.setThreadStatsTag(5);
+                java.net.URL url = new java.net.URL(String.format(URL_GITHUB_API_TEMPLATE, getGitRepo()));
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                int responseCode = conn.getResponseCode();
+                if (responseCode == java.net.HttpURLConnection.HTTP_OK) {
+                    java.io.InputStream is = conn.getInputStream();
+                    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+                    String response = s.hasNext() ? s.next() : "";
+                    is.close();
+                    activity.runOnUiThread(() -> handleUpdateResponse(response, consumer ));
+                } else {
+                    Log.w(TAG, "Couldn't get update info: HTTP " + responseCode);
+                }
+                conn.disconnect();
+            } catch (Exception e) {
+                Log.w(TAG, "Couldn't get update info", e);
+            }
+        }).start();
     }
-
-    private void handleUpdateResponse(String response, @Nullable Response.Listener<String> callback) {
+    private void handleUpdateResponse(String response, @Nullable Consumer<String> consumer) {
         try {
             JSONObject latestReleaseJson = new JSONObject(response);
             String tagName = latestReleaseJson.getString("tag_name");
-            if (callback != null) callback.onResponse(tagName);
-            latestVersionTag = tagName;
-        } catch (JSONException e) {
-            Log.w(TAG, "Received invalid JSON", e);
-        }
+            if (consumer != null) consumer.accept(tagName);
+        } catch (JSONException ignored) {}
     }
-
 
     /**
      * Skips a specific main app update. An update prompt will not be shown for the skipped version.
      * @param versionTag Github release tag of the update to skip
      */
     public void skipAppUpdate(String versionTag) {
-        AlertDialog.Builder skipDialogBuilder =
-                new AlertDialog.Builder(activity, android.R.style.Theme_DeviceDefault_Dialog_Alert);
-        skipDialogBuilder.setTitle(activity.getString(R.string.update_skip_title, versionTag));
-        skipDialogBuilder.setMessage(R.string.update_skip_content);
-        skipDialogBuilder.setPositiveButton(R.string.update_skip_confirm_button, (dialog, i) -> {
-            putIgnoredUpdateTag(versionTag);
-            Dialog.toast(activity.getString(R.string.update_skip_toast), versionTag, false);
-            dialog.dismiss();
-        });
-        skipDialogBuilder.setNegativeButton(R.string.update_skip_cancel_button, ((dialog, i) -> dialog.dismiss()));
-        skipDialogBuilder.show();
+        putIgnoredUpdateTag(versionTag);
     }
 
     /**

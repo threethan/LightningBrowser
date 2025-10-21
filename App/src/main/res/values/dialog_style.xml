@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DialogStyle" parent="Theme.AppCompat.Dialog">
+        <item name="android:fontFamily">@font/sansserif</item>
+        <item name="android:windowBackground">@drawable/bkg_dialog</item>
+        <item name="android:buttonStyle">@style/DialogButtonStyle</item>
+        <item name="android:buttonBarButtonStyle">@style/DialogButtonStyle</item>
+        <item name="android:buttonBarStyle">@style/DialogButtonBarStyle</item>
+        <item name="android:windowTitleStyle">@style/DialogTitleStyle</item>
+    </style>
+    <style name="DialogTitleStyle">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginBottom">3dp</item>
+    </style>
+    <style name="DialogButtonStyle">
+        <item name="android:labelTextSize">24sp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:colorPrimary">#2A2A2C</item>
+        <item name="android:background">@drawable/lc_bkg_button</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginStart">5dp</item>
+        <item name="android:layout_marginEnd">5dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_weight">1000</item>
+    </style>
+    <style name="DialogButtonBarStyle">
+        <item name="android:paddingTop">8dp</item>
+    </style>
+
+</resources>

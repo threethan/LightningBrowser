@@ -7,10 +7,10 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 import com.threethan.browser.R;
 
@@ -35,7 +35,7 @@ public abstract class Dialog {
 
     @Nullable
     public static AlertDialog build(Context context, int resource) {
-        AlertDialog dialog = new AlertDialog.Builder(context, R.style.dialog).setView(resource).create();
+        AlertDialog dialog = new CustomDialog.Builder(context).setView(resource).create();
 
         if (dialog.getWindow() == null) return null;
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.bkg_dialog);
@@ -45,7 +45,7 @@ public abstract class Dialog {
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(rootView, "TranslationY", 100, 0);
         animator.setDuration(300);
-        animator.setInterpolator(new FastOutSlowInInterpolator());
+        animator.setInterpolator(new DecelerateInterpolator());
         animator.start();
 
         dialog.show();
@@ -62,7 +62,7 @@ public abstract class Dialog {
         if (getActivityContext() == null) return;
 
         // Fake toast for the Quest
-        AlertDialog dialog = new AlertDialog.Builder(getActivityContext(), R.style.dialogToast).setView(R.layout.dialog_toast).create();
+        AlertDialog dialog = new CustomDialog.Builder(getActivityContext()).setView(R.layout.dialog_toast).create();
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
