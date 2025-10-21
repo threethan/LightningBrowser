@@ -8,16 +8,15 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.os.Build;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.MotionEvent.PointerCoords;
-import android.view.MotionEvent.PointerProperties;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
@@ -28,6 +27,9 @@ import androidx.annotation.NonNull;
 import org.mozilla.geckoview.GeckoView;
 import org.mozilla.geckoview.PanZoomController;
 import org.mozilla.geckoview.ScreenLength;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 // ADAPTED FROM https://gist.github.com/iyashamihsan/1ab5c1cfa47dea735ea46d8943a1bde4
 // Replaces d-pad navigation with an on-screen cursor that behaves like a mouse
@@ -49,112 +51,167 @@ public class CursorLayout extends LinearLayout {
     private float sizeMult = 0.0f;
     private float holdMult = 1.0f;
     public View targetView;
-    private final Runnable cursorUpdateRunnable = new Runnable() {
-        public void run() {
-            long currentTimeMillis = System.currentTimeMillis();
-            float deltaTime = (currentTimeMillis - lastCursorUpdate)/1000f;
-            lastCursorUpdate = currentTimeMillis;
-            CursorLayout cursorLayout = CursorLayout.this;
+
+    private final Runnable updateCursorRunnable = this::updateCursor;
+    private boolean hovering;
+
+    private synchronized void updateCursor() {
+        long currentTimeMillis = System.currentTimeMillis();
+        float deltaTime = (currentTimeMillis - lastCursorUpdate)/1000f;
+        lastCursorUpdate = currentTimeMillis;
+        CursorLayout cursorLayout = CursorLayout.this;
 
 
-            float f = (deltaTime/PHYSICS_SUBSTEPS) * CURSOR_ACCEL;
-            for (int i=0; i<PHYSICS_SUBSTEPS; i++) {
-                float xSpeed = cursorSpeed.x;
-                float xSpeedBound = cursorLayout.bound(xSpeed + (bound((float) cursorDirection.x, 1.0f) * f), CursorLayout.MAX_CURSOR_SPEED);
-                cursorSpeed.set(xSpeedBound, bound(cursorSpeed.y + (bound((float) cursorDirection.y, 1.0f) * f), CursorLayout.MAX_CURSOR_SPEED));
+        float f = (deltaTime/PHYSICS_SUBSTEPS) * CURSOR_ACCEL;
+        for (int i=0; i<PHYSICS_SUBSTEPS; i++) {
+            float xSpeed = cursorSpeed.x;
+            float xSpeedBound = cursorLayout.bound(xSpeed + (bound((float) cursorDirection.x, 1.0f) * f), CursorLayout.MAX_CURSOR_SPEED);
+            cursorSpeed.set(xSpeedBound, bound(cursorSpeed.y + (bound((float) cursorDirection.y, 1.0f) * f), CursorLayout.MAX_CURSOR_SPEED));
+        }
+
+        if (Math.abs(cursorSpeed.x) < 0.1f) cursorSpeed.x = 0.0f;
+        else if (Math.abs(cursorSpeed.x) < MIN_CURSOR_SPEED && cursorDirection.x != 0)
+            cursorSpeed.x += MIN_CURSOR_SPEED * (cursorDirection.x > 0 ? 1 : -1);
+
+        if (Math.abs(cursorSpeed.y) < 0.1f) cursorSpeed.y = 0.0f;
+        else if (Math.abs(cursorSpeed.y) < MIN_CURSOR_SPEED && cursorDirection.y != 0)
+            cursorSpeed.y += MIN_CURSOR_SPEED * (cursorDirection.y > 0 ? 1 : -1);
+
+        if (cursorDirection.x == 0)
+            for (int i=0; i<PHYSICS_SUBSTEPS; i++)
+                cursorSpeed.x -= cursorSpeed.x * Math.min(1f, deltaTime/PHYSICS_SUBSTEPS * CURSOR_FRICTION);
+        if (cursorDirection.y == 0)
+            for (int i=0; i<PHYSICS_SUBSTEPS; i++)
+                cursorSpeed.y -= cursorSpeed.y * Math.min(1f, deltaTime/PHYSICS_SUBSTEPS * CURSOR_FRICTION);
+
+        if (cursorDirection.x == 0 && cursorDirection.y == 0 && cursorSpeed.x == 0.0f && cursorSpeed.y == 0.0f) {
+            if (getHandler() != null) {
+                // Hide cursor after timeout
+                getHandler().postDelayed(CursorLayout.this::visUpdate, 5000);
             }
+            return;
+        }
 
-            if (Math.abs(cursorSpeed.x) < 0.1f) cursorSpeed.x = 0.0f;
-            else if (Math.abs(cursorSpeed.x) < MIN_CURSOR_SPEED && cursorDirection.x != 0)
-                cursorSpeed.x += MIN_CURSOR_SPEED * (cursorDirection.x > 0 ? 1 : -1);
+        tmpPointF.set(cursorPosition);
+        cursorPosition.offset(cursorSpeed.x*deltaTime, cursorSpeed.y*deltaTime);
 
-            if (Math.abs(cursorSpeed.y) < 0.1f) cursorSpeed.y = 0.0f;
-            else if (Math.abs(cursorSpeed.y) < MIN_CURSOR_SPEED && cursorDirection.y != 0)
-                cursorSpeed.y += MIN_CURSOR_SPEED * (cursorDirection.y > 0 ? 1 : -1);
-
-            if (cursorDirection.x == 0)
-                for (int i=0; i<PHYSICS_SUBSTEPS; i++)
-                    cursorSpeed.x -= cursorSpeed.x * Math.min(1f, deltaTime/PHYSICS_SUBSTEPS * CURSOR_FRICTION);
-            if (cursorDirection.y == 0)
-                for (int i=0; i<PHYSICS_SUBSTEPS; i++)
-                    cursorSpeed.y -= cursorSpeed.y * Math.min(1f, deltaTime/PHYSICS_SUBSTEPS * CURSOR_FRICTION);
-
-            if (cursorDirection.x == 0 && cursorDirection.y == 0 && cursorSpeed.x == 0.0f && cursorSpeed.y == 0.0f) {
-                if (getHandler() != null) {
-                    // Hide cursor after timeout
-                    getHandler().postDelayed(CursorLayout.this::visUpdate, 5000);
+        if (cursorPosition.x < 0.0f) cursorPosition.x = 0.1f; // Cap to > 0 to avoid scroll lock-up
+        else if (cursorPosition.x > ((float) (getWidth() - 1)))  cursorPosition.x = (float) (getWidth() - 1);
+        if (cursorPosition.y < 0.0f) cursorPosition.y = 0.1f; // Cap to > 0 to avoid scroll lock-up
+        else if (cursorPosition.y > ((float) (getHeight() - 1))) cursorPosition.y = (float) (getHeight() - 1);
+        if (!tmpPointF.equals(cursorPosition)) {
+            if (centerPressed) {
+                dispatchMotionEvent(cursorPosition.x, cursorPosition.y, MotionEvent.ACTION_MOVE); // Drag
+            } else {
+                if (hovering) {
+                    dispatchMotionEvent(cursorPosition.x, cursorPosition.y, MotionEvent.ACTION_HOVER_MOVE); // Hover
+                } else {
+                    dispatchMotionEvent(cursorPosition.x, cursorPosition.y, MotionEvent.ACTION_HOVER_ENTER); // Hover enter
+                    hovering = true;
                 }
-                return;
             }
-
-            tmpPointF.set(cursorPosition);
-            cursorPosition.offset(cursorSpeed.x*deltaTime, cursorSpeed.y*deltaTime);
-
-            if (cursorPosition.x < 0.0f) cursorPosition.x = 0.0f;
-            else if (cursorPosition.x > ((float) (getWidth() - 1)))  cursorPosition.x = (float) (getWidth() - 1);
-            if (cursorPosition.y < 0.0f) cursorPosition.y = 0.0f;
-            else if (cursorPosition.y > ((float) (getHeight() - 1))) cursorPosition.y = (float) (getHeight() - 1);
-            if (!tmpPointF.equals(cursorPosition))
-                if (centerPressed)
-                    dispatchMotionEvent(cursorPosition.x, cursorPosition.y, MotionEvent.ACTION_MOVE); // Drag
-
-
-            if (targetView != null) {
-                try {
-                    float deltaX = 0;
-                    float deltaY = 0;
-                    if (cursorPosition.y > ((float) (getHeight() - CursorLayout.SCROLL_START_PADDING))) {
-                        if (cursorSpeed.y > 0.0f) {
-                            deltaY += cursorPosition.y * deltaTime * SCROLL_MULT;
-                        }
-                    } else if (cursorPosition.y < ((float) CursorLayout.SCROLL_START_PADDING) && cursorSpeed.y < 0.0f) {
-                        deltaY += cursorSpeed.y * deltaTime * SCROLL_MULT;
+}
+        if (targetView != null) {
+            try {
+                float deltaX = 0;
+                float deltaY = 0;
+                if (cursorPosition.y > ((float) (getHeight() - CursorLayout.SCROLL_START_PADDING))) {
+                    if (cursorSpeed.y > 0.0f) {
+                        deltaY += cursorPosition.y * deltaTime * SCROLL_MULT;
                     }
-                    if (cursorPosition.x > ((float) (getWidth() - CursorLayout.SCROLL_START_PADDING))) {
-                        if (cursorSpeed.x > 0.0f) {
-                            deltaX += cursorSpeed.x * deltaTime * SCROLL_MULT;
-                        }
-                    } else if (cursorPosition.x < ((float) CursorLayout.SCROLL_START_PADDING) && cursorSpeed.x < 0.0f) {
+                } else if (cursorPosition.y < ((float) CursorLayout.SCROLL_START_PADDING) && cursorSpeed.y < 0.0f) {
+                    deltaY += cursorSpeed.y * deltaTime * SCROLL_MULT;
+                }
+                if (cursorPosition.x > ((float) (getWidth() - CursorLayout.SCROLL_START_PADDING))) {
+                    if (cursorSpeed.x > 0.0f) {
                         deltaX += cursorSpeed.x * deltaTime * SCROLL_MULT;
                     }
-                    if (deltaX != 0 || deltaY != 0)
-                        scrollTargetBy(targetView, deltaX, deltaY);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } else if (cursorPosition.x < ((float) CursorLayout.SCROLL_START_PADDING) && cursorSpeed.x < 0.0f) {
+                    deltaX += cursorSpeed.x * deltaTime * SCROLL_MULT;
                 }
+                if (deltaX != 0 || deltaY != 0)
+                    scrollTargetBy(deltaX, deltaY);
+            } catch (Exception e) {
+                Log.w("CursorLayout", "Exception during scroll", e);
             }
-            if (getHandler() != null) {
-                getHandler().post(this);
-            }
-            visUpdate();
         }
-    };
+        post(this::updateCursor);
+        visUpdate();
+    }
     private boolean centerPressed;
     private long downTime;
 
-    private int geckoAccummulatedX = 0;
-    private int geckoAccummulatedY = 0;
-    private void scrollTargetBy(View targetView, float deltaX, float deltaY) {
-        if (targetView instanceof GeckoView) {
-            PanZoomController pzc = ((GeckoView) targetView).getPanZoomController();
-            int GECKO_SCROLL_INCREMENT = 25;
-            if (geckoAccummulatedY > GECKO_SCROLL_INCREMENT || geckoAccummulatedY < -GECKO_SCROLL_INCREMENT) {
-                pzc.scrollBy(ScreenLength.zero(), ScreenLength.fromPixels(geckoAccummulatedY),
-                        PanZoomController.SCROLL_BEHAVIOR_AUTO);
-                geckoAccummulatedY = 0;
+    private int geckoAccumulatedX = 0;
+    private int geckoAccumulatedY = 0;
+    private static final Rect mTempRect = new Rect();
+    private synchronized void scrollTargetBy(float deltaX, float deltaY) {
+        if (targetView instanceof GeckoView geckoView) {
+            PanZoomController pzc = geckoView.getPanZoomController();
+
+            MotionEvent dispatchEvent = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_SCROLL, deltaX, deltaY*100, 0);
+            pzc.onMotionEvent(dispatchEvent);
+            dispatchEvent.recycle();
+
+            // Hack into native scroll handler for better response
+            try {
+                Field nativeField = PanZoomController.class.getDeclaredField("mNative");
+                nativeField.setAccessible(true);
+                Object nativeObject = nativeField.get(pzc);
+
+
+                assert nativeObject != null;
+                Field attachedField = PanZoomController.class.getDeclaredField("mAttached");
+                attachedField.setAccessible(true);
+                //noinspection DataFlowIssue
+                boolean isAttached = (boolean) attachedField.get(pzc);
+                if (!isAttached) {
+                    // Prevent crash and fall back to normal scroll
+                    throw new IllegalStateException("PanZoomController not attached yet");
+                }
+
+                Method handleScrollMethod = nativeObject.getClass().getDeclaredMethod(
+                    "handleScrollEvent",
+                    long.class, int.class, float.class, float.class, float.class, float.class
+                );
+                handleScrollMethod.setAccessible(true);
+                assert geckoView.getSession() != null;
+                geckoView.getSession().getSurfaceBounds(mTempRect);
+                float x = cursorPosition.x - mTempRect.left;
+                float y = cursorPosition.y - mTempRect.top;
+                if (y > mTempRect.bottom) y = mTempRect.bottom - 1;
+                if (x > mTempRect.right) x = mTempRect.right - 1;
+                handleScrollMethod.invoke(
+                    nativeObject,
+                    dispatchEvent.getEventTime(),
+                    dispatchEvent.getMetaState(),
+                    x,
+                    y,
+                    -deltaX,
+                    -deltaY
+                );
+                return;
+            } catch (Throwable e) {
+                Log.w("CursorLayout", "Failed to invoke native scroll handler, falling back", e);
             }
-            if (geckoAccummulatedX > GECKO_SCROLL_INCREMENT || geckoAccummulatedX < -GECKO_SCROLL_INCREMENT) {
-                pzc.scrollBy(ScreenLength.fromPixels(geckoAccummulatedX), ScreenLength.zero(),
+
+            // Avoiding small scroll increments means better performance/smooth scroll
+            int GECKO_MIN_SCROLL_INCREMENT = getMeasuredHeight() / 25;
+
+            if (geckoAccumulatedX > GECKO_MIN_SCROLL_INCREMENT || geckoAccumulatedX < -GECKO_MIN_SCROLL_INCREMENT
+                || geckoAccumulatedY > GECKO_MIN_SCROLL_INCREMENT || geckoAccumulatedY < -GECKO_MIN_SCROLL_INCREMENT) {
+                pzc.scrollBy(ScreenLength.fromPixels(geckoAccumulatedX), ScreenLength.fromPixels(geckoAccumulatedY),
                         PanZoomController.SCROLL_BEHAVIOR_AUTO);
-                geckoAccummulatedX = 0;
+                geckoAccumulatedX = 0;
+                geckoAccumulatedY = 0;
             }
-            geckoAccummulatedY += deltaY;
-            geckoAccummulatedX += deltaX;
+            geckoAccumulatedY += (int) deltaY;
+            geckoAccumulatedX += (int) deltaX;
         } else {
             targetView.scrollBy((int) deltaX, (int) deltaY);
         }
     }
 
+    private final Runnable visUpdateRunnable = this::visUpdate;
     private void visUpdate() {
         invalidate();
 
@@ -162,7 +219,8 @@ public class CursorLayout extends LinearLayout {
         if (Math.abs(sizeMult - cursorVisTarget) < 0.1) sizeMult = cursorVisTarget;
         else {
             sizeMult += (cursorVisTarget-sizeMult) * (isCursorVisible() ? 0.02f : 0.2f);
-            post(this::visUpdate);
+            removeCallbacks(visUpdateRunnable);
+            post(visUpdateRunnable);
         }
     }
 
@@ -200,11 +258,10 @@ public class CursorLayout extends LinearLayout {
 
         // Drag&Drop can eat all input as we don't have a mouse on the system level
         setOnDragListener((v, event) -> {
-            if (event.getAction() == DragEvent.ACTION_DRAG_STARTED)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    cancelDragAndDrop();
-                    cancelLongPress();
-                }
+            if (event.getAction() == DragEvent.ACTION_DRAG_STARTED) {
+                cancelDragAndDrop();
+                cancelLongPress();
+            }
             return false;
         });
     }
@@ -214,7 +271,7 @@ public class CursorLayout extends LinearLayout {
         if (!isInEditMode()) {
             this.cursorPosition.set(((float) w) / 2.0f, ((float) oldWidth) / 2.0f);
             if (getHandler() != null) {
-                getHandler().postDelayed(this.cursorUpdateRunnable, 5000);
+                getHandler().postDelayed(this::updateCursor, 5000);
             }
         }
     }
@@ -229,64 +286,64 @@ public class CursorLayout extends LinearLayout {
                     if (keyEvent.getAction() == 0) {
                         if (this.cursorPosition.y <= 0.0f)
                             return super.dispatchKeyEvent(keyEvent);
-                        handleDirectionKeyEvent(keyEvent, -100, -1, true);
+                        handleDirectionKeyEvent(keyEvent, -100, -1);
                     } else
-                        handleDirectionKeyEvent(keyEvent, -100, 0, false);
+                        handleDirectionKeyEvent(keyEvent, -100, 0);
                     return true;
                 }
                 case KeyEvent.KEYCODE_DPAD_DOWN -> {
                     if (keyEvent.getAction() == 0) {
                         if (this.cursorPosition.y >= ((float) getHeight()))
                             return super.dispatchKeyEvent(keyEvent);
-                        handleDirectionKeyEvent(keyEvent, -100, 1, true);
+                        handleDirectionKeyEvent(keyEvent, -100, 1);
                     } else
-                        handleDirectionKeyEvent(keyEvent, -100, 0, false);
+                        handleDirectionKeyEvent(keyEvent, -100, 0);
                     return true;
                 }
                 case KeyEvent.KEYCODE_DPAD_LEFT -> {
                     if (keyEvent.getAction() == 0) {
                         if (this.cursorPosition.x <= 0.0f)
                             return super.dispatchKeyEvent(keyEvent);
-                        handleDirectionKeyEvent(keyEvent, -1, -100, true);
+                        handleDirectionKeyEvent(keyEvent, -1, -100);
                     } else
-                        handleDirectionKeyEvent(keyEvent, 0, -100, false);
+                        handleDirectionKeyEvent(keyEvent, 0, -100);
                     return true;
                 }
                 case KeyEvent.KEYCODE_DPAD_RIGHT -> {
                     if (keyEvent.getAction() == 0) {
                         if (this.cursorPosition.x >= ((float) getWidth()))
                             return super.dispatchKeyEvent(keyEvent);
-                        handleDirectionKeyEvent(keyEvent, 1, -100, true);
+                        handleDirectionKeyEvent(keyEvent, 1, -100);
                     } else
-                        handleDirectionKeyEvent(keyEvent, 0, -100, false);
+                        handleDirectionKeyEvent(keyEvent, 0, -100);
                     return true;
                 }
                 case KeyEvent.KEYCODE_DPAD_UP_LEFT -> {
                     if (keyEvent.getAction() == 0)
-                        handleDirectionKeyEvent(keyEvent, -1, -1, true);
+                        handleDirectionKeyEvent(keyEvent, -1, -1);
                     else
-                        handleDirectionKeyEvent(keyEvent, 0, 0, false);
+                        handleDirectionKeyEvent(keyEvent, 0, 0);
                     return true;
                 }
                 case KeyEvent.KEYCODE_DPAD_DOWN_LEFT -> {
                     if (keyEvent.getAction() == 0)
-                        handleDirectionKeyEvent(keyEvent, -1, 1, true);
+                        handleDirectionKeyEvent(keyEvent, -1, 1);
                     else
-                        handleDirectionKeyEvent(keyEvent, 0, 0, false);
+                        handleDirectionKeyEvent(keyEvent, 0, 0);
                     return true;
                 }
                 case KeyEvent.KEYCODE_DPAD_UP_RIGHT -> {
                     if (keyEvent.getAction() == 0)
-                        handleDirectionKeyEvent(keyEvent, 1, -1, true);
+                        handleDirectionKeyEvent(keyEvent, 1, -1);
                     else
-                        handleDirectionKeyEvent(keyEvent, 0, 0, false);
+                        handleDirectionKeyEvent(keyEvent, 0, 0);
                     return true;
                 }
                 case KeyEvent.KEYCODE_DPAD_DOWN_RIGHT -> {
                     if (keyEvent.getAction() == 0)
-                        handleDirectionKeyEvent(keyEvent, 1, 1, true);
+                        handleDirectionKeyEvent(keyEvent, 1, 1);
                     else
-                        handleDirectionKeyEvent(keyEvent, 0, 0, false);
+                        handleDirectionKeyEvent(keyEvent, 0, 0);
                     return true;
                 }
                 case KeyEvent.KEYCODE_DPAD_CENTER -> {
@@ -294,9 +351,6 @@ public class CursorLayout extends LinearLayout {
 
                         // Click animation
                         if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && !getKeyDispatcherState().isTracking(keyEvent)) {
-                            // Cancel possible hover event
-//                            if (ALLOW_HOVER) dispatchMotionEvent(this.cursorPosition.x, this.cursorPosition.y, MotionEvent.ACTION_CANCEL);
-
                             centerPressed = true;
 
                             getKeyDispatcherState().startTracking(keyEvent, this);
@@ -355,32 +409,30 @@ public class CursorLayout extends LinearLayout {
     }
 
     protected void dispatchMotionEvent(float x, float y, int action) {
-        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)
-            downTime = SystemClock.uptimeMillis();
+        if (action == MotionEvent.ACTION_DOWN) downTime = SystemClock.uptimeMillis();
+
         long eventTime = SystemClock.uptimeMillis();
-        PointerProperties pointerProperties = new PointerProperties();
-        pointerProperties.id = 0;
-        pointerProperties.toolType = MotionEvent.TOOL_TYPE_FINGER;
-        PointerProperties[] pointerPropertiesArr = {pointerProperties};
-        PointerCoords pointerCoords = new PointerCoords();
-        pointerCoords.x = x;
-        pointerCoords.y = y;
-        pointerCoords.pressure = 1.0f;
-        pointerCoords.size = 1.0f;
-        dispatchTouchEvent(
-                MotionEvent.obtain(downTime, eventTime, action, 1, pointerPropertiesArr, new PointerCoords[]{pointerCoords}, 0, 0, 1.0f, 1.0f, 0, 0, 0, 0));
+
+        boolean isHoverEvent = action ==
+                MotionEvent.ACTION_HOVER_ENTER
+                || action == MotionEvent.ACTION_HOVER_MOVE
+                || action == MotionEvent.ACTION_HOVER_EXIT;
+
+        MotionEvent dispatchEvent = MotionEvent.obtain(downTime, eventTime, action, x, y, 0);
+        if (isHoverEvent) {
+            dispatchGenericPointerEvent(dispatchEvent);
+        } else {
+            dispatchTouchEvent(dispatchEvent);
+        }
+        dispatchEvent.recycle();
     }
 
-    protected void handleDirectionKeyEvent(KeyEvent keyEvent, int x, int y, boolean hasInput) {
+    protected void handleDirectionKeyEvent(KeyEvent keyEvent, int x, int y) {
         this.lastCursorUpdate = System.currentTimeMillis();
-        if (!hasInput) {
-            cursorDirection.x = 0;
-            cursorDirection.y = 0;
-        }
 
         Handler handler = getHandler();
-        handler.removeCallbacks(this.cursorUpdateRunnable);
-        handler.post(this.cursorUpdateRunnable);
+        handler.removeCallbacks(updateCursorRunnable);
+        handler.post(updateCursorRunnable);
 
         try {
             getKeyDispatcherState().startTracking(keyEvent, this);
@@ -388,7 +440,7 @@ public class CursorLayout extends LinearLayout {
 
         Point point = this.cursorDirection;
         if (x == -100) x = point.x;
-        if (y == -100) y = this.cursorDirection.y;
+        if (y == -100) y = point.y;
         point.set(x, y);
     }
     @Override
@@ -422,5 +474,10 @@ public class CursorLayout extends LinearLayout {
     }
     protected boolean isCursorVisible() {
         return System.currentTimeMillis() - this.lastCursorUpdate <= 4000;
+    }
+
+    @Override
+    public void scrollBy(int x, int y) {
+        scrollTargetBy(x, y);
     }
 }
