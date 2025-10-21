@@ -19,7 +19,6 @@
     <style name="ThemeOverlay.ATV" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">@font/sansserif</item>
         <item name="android:colorPrimary">#2a2a2c</item>
-        <item name="android:windowBackground">@drawable/ic_app_splash</item>
     </style>
     <style name="ThemeOverlay.Browser" parent="ThemeOverlay.Standard">
         <item name="android:windowBackground">@drawable/bg_meta_darker</item>

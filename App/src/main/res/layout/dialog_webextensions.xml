@@ -15,7 +15,7 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginBottom="-30dp"
-        android:background="@drawable/bkg_hover_button"
+        android:background="@drawable/bkg_hover_button_small"
         android:src="@drawable/ic_back" />
 
     <TextView

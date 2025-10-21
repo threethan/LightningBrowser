@@ -26,7 +26,7 @@
             android:layout_height="45sp"
             android:layout_weight="1"
             android:autofillHints="text"
-            android:background="@drawable/bkg_name_app"
+            android:background="@drawable/bkg_name_bookmark"
             android:gravity="start|center_vertical"
             android:inputType="text"
             android:nextFocusRight="@id/clear"

@@ -63,7 +63,7 @@
         android:layout_marginStart="5dp"
         android:background="@drawable/bkg_button"
         android:padding="10dp"
-        android:src="@drawable/ic_config" />
+        android:src="@drawable/ic_open_settings" />
 
     <ImageView
         android:id="@+id/uninstall"

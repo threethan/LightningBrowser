@@ -1,20 +1,27 @@
 package com.threethan.browser.helper;
 
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Paint;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import com.threethan.browser.R;
+import com.threethan.browser.browser.BrowserActivity;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 /*
     Dialog
@@ -58,28 +65,52 @@ public abstract class Dialog {
         toast(string, "", false);
     }
 
-    public static void toast(String stringMain, String stringBold, boolean isLong) {
-        if (getActivityContext() == null) return;
-
-        // Fake toast for the Quest
-        AlertDialog dialog = new CustomDialog.Builder(getActivityContext()).setView(R.layout.dialog_toast).create();
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
-            dialog.getWindow().setBackgroundDrawableResource(R.drawable.bkg_dialog_transparent);
-            dialog.getWindow().setDimAmount(0.0f);
-            final int FLAGS = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-            dialog.getWindow().setFlags(FLAGS, FLAGS);
+    // Custom dialog that catches exceptions on dismiss
+    protected static class ToastDialog extends AlertDialog {
+        protected ToastDialog(Context context) {
+            super(context);
         }
-        dialog.show();
 
-        ((TextView) dialog.findViewById(R.id.toastTextMain)).setText(stringMain);
-        ((TextView) dialog.findViewById(R.id.toastTextBold)).setText(stringBold);
-
-        // Dismiss if not done automatically
-        dialog.findViewById(R.id.toastTextMain).postDelayed(dialog::dismiss,
-                isLong ? 5000 : 1750);
+        @Override
+        public void dismiss() {
+            try {
+                super.dismiss();
+            } catch (Exception ignored) {}
+        }
     }
+    public static void toast(CharSequence stringMain, CharSequence stringBold, boolean isLong) {
+        Log.d("Toast", stringMain + " " + stringBold);
+
+        try {
+            LayoutInflater inflater =
+                    Objects.requireNonNull(getActivityContext())
+                            .getLayoutInflater();
+            @SuppressLint("InflateParams")
+            View layout = inflater.inflate(R.layout.dialog_toast, null);
+
+            TextView textMain = layout.findViewById(R.id.toastTextMain);
+            TextView textBold = layout.findViewById(R.id.toastTextBold);
+            textMain.setText(stringMain);
+            textBold.setText(stringBold);
+
+            AlertDialog dialog = new ToastDialog(getActivityContext());
+            dialog.setView(layout);
+            dialog.setCancelable(true);
+
+            Window window = dialog.getWindow();
+            if (window == null) return;
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_PANEL);
+            window.setFlags(
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+                            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    0xFFFFFFFF
+            );
+            textMain.postDelayed(dialog::dismiss, isLong ? 3500 : 2000);
+            dialog.show();
+        } catch (Exception e) {
+            Log.w("Toast", "Failed to show toast", e);
+        }
+    }
+
 }
