@@ -17,7 +17,6 @@ public class CustomScrollDelegate implements GeckoSession.ScrollDelegate {
 
     @Override
     public void onScrollChanged(@NonNull GeckoSession session, int scrollX, int scrollY) {
-        int deltaX = scrollX - lastScrollX;
         int deltaY = scrollY - lastScrollY;
         lastScrollX = scrollX;
         lastScrollY = scrollY;

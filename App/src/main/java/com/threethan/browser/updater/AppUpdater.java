@@ -14,7 +14,6 @@ import com.threethan.browser.lib.FileLib;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.geckoview.BuildConfig;
 
 import java.util.Objects;
 import java.util.function.Consumer;

@@ -2,7 +2,6 @@ package com.threethan.browser.browser.GeckoView.Delegate;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;

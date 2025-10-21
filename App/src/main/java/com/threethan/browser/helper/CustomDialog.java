@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.TypedValue;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.core.content.res.ResourcesCompat;
