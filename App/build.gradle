@@ -38,7 +38,6 @@ ext {
 }
 dependencies {
     implementation "org.mozilla.geckoview:geckoview:${geckoviewVersion}"
-    //noinspection GradleDependency
-    implementation 'androidx.datastore:datastore-preferences-rxjava3:1.0.0'
+    implementation 'androidx.datastore:datastore-preferences-rxjava3:1.1.7'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
 }

@@ -4,17 +4,34 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.threethan.launcher",
+  "applicationId": "com.threethan.browser",
   "variantName": "release",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 620,
-      "versionName": "6.2.0",
+      "versionCode": 1300,
+      "versionName": "1.3.0",
       "outputFile": "App-release.apk"
     }
   ],
-  "elementType": "File"
+  "elementType": "File",
+  "baselineProfiles": [
+    {
+      "minApi": 28,
+      "maxApi": 30,
+      "baselineProfiles": [
+        "baselineProfiles/1/App-release.dm"
+      ]
+    },
+    {
+      "minApi": 31,
+      "maxApi": 2147483647,
+      "baselineProfiles": [
+        "baselineProfiles/0/App-release.dm"
+      ]
+    }
+  ],
+  "minSdkVersionForDexing": 24
 }
