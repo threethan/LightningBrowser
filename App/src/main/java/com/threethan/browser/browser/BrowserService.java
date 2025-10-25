@@ -130,9 +130,11 @@ public class BrowserService extends Service {
         GeckoRuntimeSettings.Builder set = new GeckoRuntimeSettings.Builder()
                 .preferredColorScheme(GeckoRuntimeSettings.COLOR_SCHEME_DARK)
                 .consoleOutput(false)
-                .loginAutofillEnabled(true)
+                .loginAutofillEnabled(false)
                 .extensionsProcessEnabled(true)
                 .extensionsWebAPIEnabled(true)
+                .glMsaaLevel(0)
+                .debugLogging(false)
                 .aboutConfigEnabled(true);
         BrowserService.sRuntime = GeckoRuntime.create(this, set.build());
         // Custom Fixes
@@ -262,8 +264,7 @@ public class BrowserService extends Service {
         } else return "Untitled Tab";
     }
     public static String getUrl(String tabId) {
-        if (urlByTabId.containsKey(tabId)) return urlByTabId.get(tabId);
-        else return "---";
+        return urlByTabId.getOrDefault(tabId, "---");
     }
     public static void putTitle(String tabId, String title) {
         titleByTabId.put(tabId, title);
@@ -326,7 +327,7 @@ public class BrowserService extends Service {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, getNotification());
 
-        if (webViewByTabId.size() < 1) stopSelf();
+        if (webViewByTabId.isEmpty()) stopSelf();
         tabUpdate(null);
     }
 

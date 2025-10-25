@@ -21,6 +21,8 @@ import com.threethan.browser.updater.BrowserUpdater;
 import com.threethan.browser.wrapper.BoundActivity;
 import com.threethan.browser.wrapper.EditTextWatched;
 
+import org.mozilla.geckoview.GeckoSession;
+
 public class BrowserActivity extends BoundActivity {
     private BrowserWebView w;
     TextView urlPre;
@@ -257,6 +259,9 @@ public class BrowserActivity extends BoundActivity {
     public void onBackPressed() {
         if (isTopBarForcablyHidden) {
             showTopBar();
+        } else if (isFullScreen()) {
+            fullScreenSession.exitFullScreen();
+            setFullScreenSession(null);
         } else if (findViewById(R.id.topBarEdit).getVisibility() == View.VISIBLE)
             findViewById(R.id.cancel).callOnClick();
         else {
@@ -326,7 +331,7 @@ public class BrowserActivity extends BoundActivity {
     private int accumulatedScrollY = 0;
     private boolean topBarOnCooldown = false;
     public void handleScrollChanged(int deltaY) {
-        if (topBarOnCooldown || isTopBarForcablyHidden) return;
+        if (topBarOnCooldown || isTopBarForcablyHidden || isFullScreen()) return;
 
         final int THRESH = 50;
 
@@ -362,5 +367,16 @@ public class BrowserActivity extends BoundActivity {
     private int getTopLayoutHeight() {
         float scale = getResources().getDisplayMetrics().density;
         return (int) (42 * scale + 0.5f);
+    }
+
+    GeckoSession fullScreenSession = null;
+    protected boolean isFullScreen() {
+        return fullScreenSession != null;
+    }
+
+    public void setFullScreenSession(GeckoSession geckoSession) {
+        this.fullScreenSession = geckoSession;
+        if (isFullScreen()) hideTopBar();
+        else showTopBar();
     }
 }

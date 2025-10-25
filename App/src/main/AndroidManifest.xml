@@ -6,7 +6,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:ignore="RequestInstallPackagesPolicy" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES"/>
 
     <!--  For backup/download  -->
@@ -31,6 +32,7 @@
         tools:ignore="SystemPermissionTypo" />
 
     <application
+        android:extractNativeLibs="true"
         android:icon="@drawable/ic_app_icon"
         android:label="@string/app_name"
         android:theme="@style/ThemeOverlay.Standard"
@@ -43,7 +45,6 @@
         <!-- Main activity -->
         <!-- Activity for browsers which open within the main window -->
         <activity android:name=".browser.BrowserActivity"
-            android:screenOrientation="unspecified"
             android:configChanges="density|keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|uiMode"
             android:exported="true"
             android:resizeableActivity="true"
@@ -97,7 +98,6 @@
 
         <!-- Activity that provides the basic list and start screen -->
         <activity android:name=".wrapper.WrapperActivity"
-            android:screenOrientation="unspecified"
             android:configChanges="density|keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|uiMode"
             android:exported="true"
             android:resizeableActivity="true"
