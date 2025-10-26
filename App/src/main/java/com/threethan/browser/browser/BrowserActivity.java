@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 
@@ -337,22 +339,37 @@ public class BrowserActivity extends BoundActivity {
         startLoading();
     }
 
+    @NonNull
+    @Override
+    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+        OnBackInvokedDispatcher dispatcher = super.getOnBackInvokedDispatcher();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            dispatcher.registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    this::handleBackPressed
+            );
+        }
+        return dispatcher;
+    }
     @SuppressLint("GestureBackNavigation")
     @Override
     public void onBackPressed() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            handleBackPressed();
+        }
+    }
+    public void handleBackPressed() {
         if (isTopBarForciblyHidden) {
             showTopBar();
         } else if (isFullScreen()) {
             fullScreenSession.exitFullScreen();
             setFullScreenSession(null);
-        } else if (findViewById(R.id.topBarEdit).getVisibility() == View.VISIBLE)
+        } else if (findViewById(R.id.topBarEdit).getVisibility() == View.VISIBLE) {
             findViewById(R.id.cancel).callOnClick();
-        else {
-            if (w.canGoBack()) {
-                w.goBack();
-                updateButtonsAndUrl();
-            } else finish();
-        }
+        } else if (w.canGoBack()) {
+            w.goBack();
+            updateButtonsAndUrl();
+        } else finish();
     }
 
     @Override
