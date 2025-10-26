@@ -8,8 +8,11 @@
     <string name="apps_hidden">- Versteckt</string>
 
     <string name="bookmarks_title">Lesezeichen</string>
-    <string name="tabs_title">Aktive Tabs</string>
-    <string name="tabs_info">Aktive Tabs können im Hintergrund Audio abspielen und aufzeichnen, sofern sie nicht geschlossen sind</string>
+    <string name="tabs_title_active">Aktive Tabs</string>
+    <string name="tabs_title_suspended">Inaktive Tabs</string>
+    <string name="tabs_info_active">Aktive Tabs können im Hintergrund Audio abspielen und aufzeichnen, sofern sie nicht geschlossen sind.</string>
+    <string name="tabs_info_active_disable"><u>Deaktivieren</u></string>
+    <string name="tabs_info_suspended_change"><u>Drücken Sie, um die Wiedergabe und Audioaufnahme des Tabs im Hintergrund zuzulassen</u></string>
 
     <!--  Tooltips  -->
     <string name="tip_kill_process">Webseite vollständig anhalten</string>
@@ -130,5 +133,7 @@ werden ausgeführt</string>
     <string name="update_skip_confirm_button">Ich verstehe, überspringen</string>
     <string name="update_skip_cancel_button">Einfach verwerfen</string>
 
-
+    <string name="web_rename">Bezeichnung ändern</string>
+    <string name="enabled">ist aktiviert</string>
+    <string name="disabled">ist deaktiviert</string>
 </resources>

@@ -20,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -35,7 +36,7 @@ import java.lang.reflect.Method;
 // Replaces d-pad navigation with an on-screen cursor that behaves like a mouse
 // This is necessary for web browsing to work, as many sites try to hook the dpad
 
-public class CursorLayout extends LinearLayout {
+public class CursorLayout extends FrameLayout {
     private static final float CURSOR_ACCEL = 900f;
     private static final float CURSOR_FRICTION = 20f;
     private static final float MAX_CURSOR_SPEED = 20000.0f;
@@ -148,75 +149,8 @@ public class CursorLayout extends LinearLayout {
 
     private boolean centerPressed;
     private long downTime;
-
-    private int geckoAccumulatedX = 0;
-    private int geckoAccumulatedY = 0;
-    private static final Rect mTempRect = new Rect();
     private synchronized void scrollTargetBy(float deltaX, float deltaY) {
-        if (targetView instanceof GeckoView geckoView) {
-            PanZoomController pzc = geckoView.getPanZoomController();
-
-            MotionEvent dispatchEvent = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_SCROLL, deltaX, deltaY*100, 0);
-            pzc.onMotionEvent(dispatchEvent);
-            dispatchEvent.recycle();
-
-            // Hack into native scroll handler for better response
-            try {
-                Field nativeField = PanZoomController.class.getDeclaredField("mNative");
-                nativeField.setAccessible(true);
-                Object nativeObject = nativeField.get(pzc);
-
-
-                assert nativeObject != null;
-                Field attachedField = PanZoomController.class.getDeclaredField("mAttached");
-                attachedField.setAccessible(true);
-                //noinspection DataFlowIssue
-                boolean isAttached = (boolean) attachedField.get(pzc);
-                if (!isAttached) {
-                    // Prevent crash and fall back to normal scroll
-                    throw new IllegalStateException("PanZoomController not attached yet");
-                }
-
-                Method handleScrollMethod = nativeObject.getClass().getDeclaredMethod(
-                    "handleScrollEvent",
-                    long.class, int.class, float.class, float.class, float.class, float.class
-                );
-                handleScrollMethod.setAccessible(true);
-                assert geckoView.getSession() != null;
-                geckoView.getSession().getSurfaceBounds(mTempRect);
-                float x = cursorPosition.x - mTempRect.left;
-                float y = cursorPosition.y - mTempRect.top;
-                if (y > mTempRect.bottom) y = mTempRect.bottom - 1;
-                if (x > mTempRect.right) x = mTempRect.right - 1;
-                handleScrollMethod.invoke(
-                    nativeObject,
-                    dispatchEvent.getEventTime(),
-                    dispatchEvent.getMetaState(),
-                    x,
-                    y,
-                    -deltaX,
-                    -deltaY
-                );
-                return;
-            } catch (Throwable e) {
-                Log.w("CursorLayout", "Failed to invoke native scroll handler, falling back", e);
-            }
-
-            // Avoiding small scroll increments means better performance/smooth scroll
-            int GECKO_MIN_SCROLL_INCREMENT = getMeasuredHeight() / 25;
-
-            if (geckoAccumulatedX > GECKO_MIN_SCROLL_INCREMENT || geckoAccumulatedX < -GECKO_MIN_SCROLL_INCREMENT
-                || geckoAccumulatedY > GECKO_MIN_SCROLL_INCREMENT || geckoAccumulatedY < -GECKO_MIN_SCROLL_INCREMENT) {
-                pzc.scrollBy(ScreenLength.fromPixels(geckoAccumulatedX), ScreenLength.fromPixels(geckoAccumulatedY),
-                        PanZoomController.SCROLL_BEHAVIOR_AUTO);
-                geckoAccumulatedX = 0;
-                geckoAccumulatedY = 0;
-            }
-            geckoAccumulatedY += (int) deltaY;
-            geckoAccumulatedX += (int) deltaX;
-        } else {
-            targetView.scrollBy((int) deltaX, (int) deltaY);
-        }
+        targetView.scrollBy((int) deltaX, (int) deltaY);
     }
 
     private final Runnable visUpdateRunnable = this::visUpdate;

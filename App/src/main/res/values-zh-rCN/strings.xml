@@ -7,8 +7,11 @@
     <string name="apps_hidden">- 隐藏</string>
 
     <string name="bookmarks_title">芸签列表</string>
-    <string name="tabs_title">选项卡列表</string>
-    <string name="tabs_info">活动选项卡可以在后台播放和录制音频</string>
+    <string name="tabs_title_active">选项卡列表（活动）</string>
+    <string name="tabs_title_suspended">选项卡列表（已暂停）</string>
+    <string name="tabs_info_active">活动选项卡可以在后台播放和录制音频</string>
+    <string name="tabs_info_active_disable">【禁用此功能】</string>
+    <string name="tabs_info_suspended_change">【按下可允许标签页在后台播放和录制音频】</string>
 
     <!--  Tooltips  -->
     <string name="tip_kill_process">停止后台运行</string>
@@ -118,4 +121,7 @@
     <string name="update_skip_confirm_button">我已了解，跳过</string>
     <string name="update_skip_cancel_button">忽略</string>
 
+    <string name="web_rename">更改标签</string>
+    <string name="enabled">已启用</string>
+    <string name="disabled">已禁用</string>
 </resources>

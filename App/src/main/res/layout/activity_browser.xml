@@ -15,7 +15,7 @@
         android:layerType="hardware"
         android:orientation="horizontal"
         android:paddingLeft="15dp"
-        android:paddingTop="4dp"
+        android:paddingTop="3dp"
         android:paddingRight="15dp">
 
         <ImageButton
@@ -185,7 +185,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/bkg_button_web"
-            android:src="@drawable/web_down"
+            android:src="@drawable/web_close"
             android:tooltipText="@string/web_exit"
             tools:ignore="UnusedAttribute" />
 
@@ -193,26 +193,32 @@
 
 
     <FrameLayout
-        android:id="@+id/loading"
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:layout_marginTop="-2dp"
-        android:visibility="gone">
+        android:layout_marginTop="40dp"
+        android:visibility="visible">
+
         <ProgressBar
+            android:id="@+id/loading"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_gravity="center_vertical|fill_horizontal"
             android:layout_width="match_parent"
             android:layout_height="20dp"
+            android:layout_gravity="center_vertical|fill_horizontal"
             android:indeterminate="true"
-            android:indeterminateTint="#E4E4E4" />
+            android:indeterminateTint="#E4E4E4"
+            android:max="100"
+            android:progressBackgroundTint="#E4E4E4"
+            android:progressTint="#E4E4E4"
+            android:visibility="visible" />
     </FrameLayout>
     <LinearLayout
         android:id="@+id/topBarEdit"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:orientation="horizontal"
         android:paddingLeft="7dp"
         android:paddingRight="7dp"
+        android:paddingTop="3dp"
         android:visibility="gone">
 
 

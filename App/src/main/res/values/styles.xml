@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="ThemeOverlay.Standard" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">#2a2a2c</item>
+        <item name="android:windowBackground">#333</item>
 
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:fontFamily">@font/sansserif</item>
-        <item name="android:colorPrimary">#2A2A2C</item>
+        <item name="android:colorPrimary">#333</item>
 
         <item name="android:labelTextSize">24sp</item>
         <item name="android:textSize">16sp</item>
 
         <item name="android:windowSplashScreenBackground" tools:ignore="NewApi">#333</item>
-        <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@drawable/bkg_button</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@mipmap/splash</item>
 
     </style>
 
-    <style name="ThemeOverlay.ATV" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:fontFamily">@font/sansserif</item>
-        <item name="android:colorPrimary">#2a2a2c</item>
-    </style>
     <style name="ThemeOverlay.Browser" parent="ThemeOverlay.Standard">
-        <item name="android:windowBackground">#333</item>
+        <item name="android:windowBackground">#2a2a2c</item>
     </style>
 
     <style name="Title">

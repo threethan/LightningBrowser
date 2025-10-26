@@ -8,8 +8,12 @@
     <string name="apps_hidden">- Hidden</string>
 
     <string name="bookmarks_title">Bookmarks</string>
-    <string name="tabs_title">Active Tabs</string>
-    <string name="tabs_info">Active tabs can play and record audio in the background unless closed</string>
+    <string name="tabs_title_active">Active Tabs</string>
+    <string name="tabs_title_suspended">Inactive Tabs</string>
+    <string name="tabs_info_active">Active tabs can play and record audio in the background.</string>
+    <string name="tabs_info_active_disable"><u>Disable</u></string>
+    <string name="tabs_info_suspended_change"><u>Allow tabs to stay active in the background</u></string>
+
 
     <!--  Tooltips  -->
     <string name="tip_kill_process">Stop Website Fully</string>
@@ -134,9 +138,8 @@
         \nYOU CAN UPDATE LATER FROM THE SETTINGS!</string>
     <string name="update_skip_confirm_button">I Understand, Skip It</string>
     <string name="update_skip_cancel_button">Just Dismiss</string>
+
     <string name="web_rename">Rename</string>
     <string name="enabled">enabled</string>
     <string name="disabled">disabled</string>
-
-
 </resources>

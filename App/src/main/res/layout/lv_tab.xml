@@ -84,6 +84,24 @@
         >
 
         <ImageButton
+            android:id="@+id/play"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/bkg_button_chip"
+            android:padding="10dp"
+            android:src="@drawable/ic_media_play"
+            android:visibility="gone" />
+        <ImageButton
+            android:id="@+id/pause"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/bkg_button_chip"
+            android:padding="10dp"
+            android:src="@drawable/ic_media_pause"
+            android:visibility="gone" />
+        <ImageButton
             android:id="@+id/addBookmark"
             android:layout_width="50dp"
             android:layout_height="match_parent"
