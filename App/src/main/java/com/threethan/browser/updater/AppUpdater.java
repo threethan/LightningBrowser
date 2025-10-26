@@ -1,7 +1,6 @@
 package com.threethan.browser.updater;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -185,7 +184,7 @@ public abstract class AppUpdater extends RemotePackageUpdater {
      */
     protected boolean isInstalledFromGooglePlay(String packageName) {
         try {
-            String installerPackageName = activity.getInstallerPackageName(packageName);
+            String installerPackageName = activity.getPackageManager().getInstallerPackageName(packageName);
             return "com.android.vending".equals(installerPackageName) || "com.google.android.feedback".equals(installerPackageName);
         } catch (IllegalArgumentException e) {
             // Package not found or other error
