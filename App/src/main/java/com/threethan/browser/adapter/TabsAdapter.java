@@ -1,6 +1,8 @@
 package com.threethan.browser.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.threethan.browser.R;
-import com.threethan.browser.browser.BrowserService;
 import com.threethan.browser.helper.FaviconLoader;
+import com.threethan.browser.helper.TabManager;
 import com.threethan.browser.wrapper.WrapperActivity;
 
 public class TabsAdapter extends ArrayListAdapter<String, TabsAdapter.TabHolder> {
@@ -29,22 +31,31 @@ public class TabsAdapter extends ArrayListAdapter<String, TabsAdapter.TabHolder>
         return new TabHolder(itemView);
     }
 
-    public String getUrl(String tabIdOrUrl) {
-        return BrowserService.getUrl(tabIdOrUrl);
+    public String getDisplayUrl(String tabIdOrUrl, TabManager tabManager) {
+        return tabManager.getUrl(tabIdOrUrl);
+    }
+    public String getOpenUrl(String tabIdOrUrl, TabManager tabManager) {
+        return tabManager.getUrl(tabIdOrUrl);
     }
     @Override
     public void onBindViewHolder(@NonNull TabHolder holder, int position) {
+        TabManager tabManager = new TabManager(wrapperActivity);
         String tabIdOrUrl = items.get(position);
-        holder.titleText.setText(BrowserService.getTitle(tabIdOrUrl));
-        final String url = getUrl(tabIdOrUrl);
+        holder.titleText.setText(tabManager.getTitle(tabIdOrUrl));
+        final String url = getDisplayUrl(tabIdOrUrl, tabManager);
         holder.urlText.setText(url);
-        FaviconLoader.loadFavicon(wrapperActivity, url, holder.favicon::setImageDrawable);
+        FaviconLoader.loadFavicon(
+                wrapperActivity, url, favicon
+                -> holder.favicon.setImageDrawable(copy(favicon))
+        );
 
         holder.closeBtn.setOnClickListener(v -> {
             int index = items.indexOf(tabIdOrUrl);
             items.remove(tabIdOrUrl);
             notifyItemRemoved(index);
-            wrapperActivity.wService.killWebView(tabIdOrUrl);
+            if (wrapperActivity.wService != null)
+                wrapperActivity.wService.killWebView(tabIdOrUrl);
+            tabManager.removeSuspendedTab(tabIdOrUrl);
         });
 
         if (wrapperActivity.bookmarkManager.getBookmarks().contains(url)) {
@@ -58,7 +69,7 @@ public class TabsAdapter extends ArrayListAdapter<String, TabsAdapter.TabHolder>
         holder.bookmarkAddBtn.setOnClickListener((view) -> {
             holder.bookmarkAddBtn.setVisibility(View.GONE);
             holder.bookmarkRemBtn.setVisibility(View.VISIBLE);
-            wrapperActivity.bookmarkManager.addBookmark(url, BrowserService.getTitle(tabIdOrUrl));
+            wrapperActivity.bookmarkManager.addBookmark(url, tabManager.getTitle(tabIdOrUrl));
         });
         holder.bookmarkRemBtn.setOnClickListener((view) -> {
             holder.bookmarkRemBtn.setVisibility(View.GONE);
@@ -66,7 +77,9 @@ public class TabsAdapter extends ArrayListAdapter<String, TabsAdapter.TabHolder>
             wrapperActivity.bookmarkManager.removeBookmark(url);
         });
 
-        holder.mainBtn.setOnClickListener(v -> wrapperActivity.open(tabIdOrUrl));
+        holder.mainBtn.setOnClickListener(v -> wrapperActivity.open(
+                getOpenUrl(tabIdOrUrl, tabManager))
+        );
         holder.mainBtn.setOnLongClickListener(v -> {
             if (holder.closeBtn.getVisibility() == View.VISIBLE) {
                 holder.closeBtn.callOnClick();
@@ -86,6 +99,14 @@ public class TabsAdapter extends ArrayListAdapter<String, TabsAdapter.TabHolder>
                 lastFocusable = holder.buttonsViewGroup.getChildAt(i);
         }
     }
+
+    private Drawable copy(Drawable favicon) {
+        if (favicon instanceof BitmapDrawable bitmapDrawable) {
+            return new BitmapDrawable(wrapperActivity.getResources(), bitmapDrawable.getBitmap());
+        }
+        return favicon;
+    }
+
     public static class TabHolder extends RecyclerView.ViewHolder {
         final View view;
         final View mainBtn;

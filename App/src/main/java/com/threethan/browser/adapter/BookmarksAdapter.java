@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 
 import com.threethan.browser.R;
 import com.threethan.browser.helper.Dialog;
+import com.threethan.browser.helper.TabManager;
 import com.threethan.browser.wrapper.EditTextWatched;
 import com.threethan.browser.wrapper.WrapperActivity;
 
@@ -19,7 +20,12 @@ public class BookmarksAdapter extends TabsAdapter {
     }
 
     @Override
-    public String getUrl(String tabIdOrUrl) {
+    public String getDisplayUrl(String tabIdOrUrl, TabManager ignored) {
+        return tabIdOrUrl;
+    }
+
+    @Override
+    public String getOpenUrl(String tabIdOrUrl, TabManager tabManager) {
         return tabIdOrUrl;
     }
 

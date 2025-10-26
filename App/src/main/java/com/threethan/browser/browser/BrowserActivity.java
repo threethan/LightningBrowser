@@ -4,10 +4,13 @@ import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.threethan.browser.R;
@@ -16,6 +19,7 @@ import com.threethan.browser.helper.BookmarkManager;
 import com.threethan.browser.helper.Dialog;
 import com.threethan.browser.helper.FaviconLoader;
 import com.threethan.browser.helper.Keyboard;
+import com.threethan.browser.helper.TabManager;
 import com.threethan.browser.lib.StringLib;
 import com.threethan.browser.updater.BrowserUpdater;
 import com.threethan.browser.wrapper.BoundActivity;
@@ -33,15 +37,14 @@ public class BrowserActivity extends BoundActivity {
     View back;
     View forward;
     View background;
-    View loading;
+    ProgressBar loading;
     View bookmarkAdd;
     View bookmarkRem;
     protected final BookmarkManager bookmarkManager = new BookmarkManager(this);
     private boolean isEphemeral;
     private boolean isTab;
-    private boolean isTopBarForcablyHidden;
+    private boolean isTopBarForciblyHidden;
     private final String DEFAULT_URL = "https://www.google.com/";
-    private CursorLayout container;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,7 +86,7 @@ public class BrowserActivity extends BoundActivity {
         Log.v("Lightning Browser", "... with url " + currentUrl + (isTab ? ", is a tab":", not a tab") + ", assigned id "+tabId);
 
         if (!isTab) {
-            isTopBarForcablyHidden = true;
+            isTopBarForciblyHidden = true;
             hideTopBar();
         }
 
@@ -206,10 +209,22 @@ public class BrowserActivity extends BoundActivity {
 
     public void startLoading() {
         loading.setVisibility(View.VISIBLE);
+        loading.setIndeterminate(true);
         back.setAlpha(0.5f);
         forward.setAlpha(0.5f);
     }
+
+
+    public void setLoadingProgress(int progress) {
+        if (progress <= 0 || progress >= 100) {
+            loading.setIndeterminate(true);
+        } else {
+            loading.setIndeterminate(false);
+            loading.setProgress(progress);
+        }
+    }
     public void stopLoading() {
+        loading.setIndeterminate(true);
         loading.setVisibility(View.GONE);
         // Update navigation
         back.setAlpha(1f);
@@ -218,14 +233,30 @@ public class BrowserActivity extends BoundActivity {
         forward.setVisibility(w.canGoForward() && !w.clearQueued ? View.VISIBLE : View.GONE);
     }
 
+    protected void setGeckoViewTop(int top) {
+        if (w != null) {
+            if (w.getLayoutParams() instanceof FrameLayout.LayoutParams flp) {
+                flp.topMargin = top;
+                flp.bottomMargin = top > 0 ? (-getTopLayoutHeight()+top) : 0;
+                w.setLayoutParams(flp);
+            }
+        } else {
+            new Handler().postDelayed(() -> setGeckoViewTop(top), 100);
+        }
+    }
+
     public void showTopBar() {
-        if (isTopBarForcablyHidden) return;
+        if (isTopBarForciblyHidden) return;
         findViewById(R.id.topBar).setVisibility(View.VISIBLE);
         findViewById(R.id.topBarEdit).setVisibility(View.GONE);
+
+        setGeckoViewTop(getTopLayoutHeight());
     }
     public void hideTopBar() {
         findViewById(R.id.topBar).setVisibility(View.GONE);
         findViewById(R.id.topBarEdit).setVisibility(View.GONE);
+
+        setGeckoViewTop(0);
     }
 
     public String currentUrl = "";
@@ -257,7 +288,7 @@ public class BrowserActivity extends BoundActivity {
 
     @Override
     public void onBackPressed() {
-        if (isTopBarForcablyHidden) {
+        if (isTopBarForciblyHidden) {
             showTopBar();
         } else if (isFullScreen()) {
             fullScreenSession.exitFullScreen();
@@ -276,9 +307,22 @@ public class BrowserActivity extends BoundActivity {
     @Override
     protected void
     onDestroy() {
+        if (wService == null) return;
         if (isFinishing()) {
             // Don't keep search views in background
             if (isEphemeral) wService.killWebView(tabId);
+            else {
+                TabManager tabManager = new TabManager(this);
+
+                if (tabManager.shouldUseSuspendedTabs(this)) {
+                    String title = BrowserService.getTitle(tabId);
+                    String url = BrowserService.getUrl(tabId);
+                    wService.killWebView(tabId);
+                    tabManager.addSuspendedTab(tabId, url, title);
+                } else {
+                    wService.setWebViewActive(tabId, false);
+                }
+            }
         }
         wService.removeActivity(this);
         super.onDestroy();
@@ -295,6 +339,7 @@ public class BrowserActivity extends BoundActivity {
     // Sets the WebView when the service is bound
     @Override
     protected void onBound() {
+        assert wService != null;
         if (tabId == null) tabId = DEFAULT_URL;
 
         // Show conditional buttons
@@ -309,7 +354,9 @@ public class BrowserActivity extends BoundActivity {
         }
 
         w = wService.getWebView(this);
-        container = findViewById(R.id.container);
+        w.setOnScrollInterceptor(this::handleScrollChanged);
+        CursorLayout container = findViewById(R.id.container);
+        setGeckoViewTop(getTopLayoutHeight());
         container.addView(w);
         container.targetView = w;
 
@@ -328,41 +375,36 @@ public class BrowserActivity extends BoundActivity {
         return true;
     }
 
-    private int accumulatedScrollY = 0;
-    private boolean topBarOnCooldown = false;
-    public void handleScrollChanged(int deltaY) {
-        if (topBarOnCooldown || isTopBarForcablyHidden || isFullScreen()) return;
+    private float accumulatedScrollY = 0;
+    public boolean handleScrollChanged(int deltaX, int deltaY) {
+        if (isTopBarForciblyHidden || isFullScreen()) return false;
 
-        final int THRESH = 50;
+        float density = getResources().getDisplayMetrics().density;
 
-        accumulatedScrollY += deltaY;
 
-        boolean hide;
+        float topLayoutHeight = getTopLayoutHeight();
 
-        if (accumulatedScrollY < -THRESH) {
-            hide = false;
-            accumulatedScrollY = -THRESH;
-        } else if (accumulatedScrollY > THRESH) {
-            hide = true;
-            accumulatedScrollY = THRESH;
-        } else return;
+        if (accumulatedScrollY > topLayoutHeight*2) accumulatedScrollY = topLayoutHeight*2;
+        if (accumulatedScrollY < -topLayoutHeight) accumulatedScrollY = -topLayoutHeight;
 
-        int topBarNewVis = hide ? View.GONE : View.VISIBLE;
-        if (findViewById(R.id.topBar).getVisibility() != topBarNewVis) {
-            if (topBarNewVis == View.VISIBLE) {
-                showTopBar();
-                container.scrollBy(0, -getTopLayoutHeight());
-            } else {
-                hideTopBar();
-                container.scrollBy(0, getTopLayoutHeight());
-            }
-            topBarOnCooldown = true;
-            container.postDelayed(() -> {
-                accumulatedScrollY = 0;
-                topBarOnCooldown = false;
-            }, 1000);
+        float prevTop = -accumulatedScrollY + topLayoutHeight;
+        if (prevTop < 0) prevTop = 0;
+        if (prevTop > topLayoutHeight) prevTop = topLayoutHeight;
+
+        accumulatedScrollY += deltaY * density;
+
+        float top = -accumulatedScrollY + topLayoutHeight;
+        if (top < 0) top = 0;
+        if (top > topLayoutHeight) top = topLayoutHeight;
+
+        if (top != prevTop) {
+            setGeckoViewTop((int) top);
+            return true;
+        } else {
+            return false;
         }
     }
+
 
     private int getTopLayoutHeight() {
         float scale = getResources().getDisplayMetrics().density;

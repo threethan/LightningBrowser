@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
@@ -46,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -68,6 +70,13 @@ public class BrowserService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+    }
+
+    public void setWebViewActive(String url, boolean b) {
+        if (webViewByTabId.containsKey(url)) {
+            BrowserWebView webView = webViewByTabId.get(url);
+            if (webView != null) webView.setActive(b);
+        }
     }
 
     public class LocalBinder extends Binder {
@@ -96,10 +105,10 @@ public class BrowserService extends Service {
         BrowserWebView webView;
         final String tabId = activity.tabId;
         if (hasWebView(tabId)) {
-            webView = webViewByTabId.get(tabId);
+            webView = webViewByTabId.get(tabId);;
 
             assert webView != null;
-            LinearLayout parent = (LinearLayout) webView.getParent();
+            ViewGroup parent = (ViewGroup) webView.getParent();
             if (parent != null) parent.removeView(webView);
 
             Activity owner = activityByTabId.get(tabId);
@@ -108,6 +117,7 @@ public class BrowserService extends Service {
                 activityByTabId.put(tabId, activity);
             }
             webView.updateActivity(activity);
+            webView.setActive(true);
         } else {
             if (BrowserService.sRuntime == null) initRuntime();
 
@@ -255,16 +265,26 @@ public class BrowserService extends Service {
     public List<String> listWebViews() {
         return new ArrayList<>(webViewByTabId.keySet());
     }
-    public static String getTitle(String tabId) {
+    public static @NonNull String getTitle(String tabId) {
+        String titleOrNull = getTitleOrNull(tabId);
+        if (titleOrNull != null) return titleOrNull;
+        else return "Untitled Tab";
+    }
+    public static @Nullable String getTitleOrNull(String tabId) {
         if (titleByTabId.containsKey(tabId)) {
             if (Objects.requireNonNull(titleByTabId.get(tabId)).isEmpty())
                 return new StringLib.ParititionedUrl(getUrl(tabId)).middle;
             else
                 return titleByTabId.get(tabId);
-        } else return "Untitled Tab";
+        } else return null;
     }
-    public static String getUrl(String tabId) {
-        return urlByTabId.getOrDefault(tabId, "---");
+    public static @NonNull String getUrl(String tabId) {
+        String urlOrNull = getUrlOrNull(tabId);
+        if (urlOrNull != null) return urlOrNull;
+        else return "---";
+    }
+    public static @Nullable String getUrlOrNull(String tabId) {
+        return urlByTabId.get(tabId);
     }
     public static void putTitle(String tabId, String title) {
         titleByTabId.put(tabId, title);
@@ -276,7 +296,7 @@ public class BrowserService extends Service {
     }
     public static String getNewTabId() {
         currentTabIdIndex++;
-        return TAB_PREFIX+currentTabIdIndex;
+        return TAB_PREFIX+currentTabIdIndex+":"+new Random().nextLong();
     }
     public static void tabUpdate(@Nullable String lastUpdatedTabId) {
         for (BoundActivity activity : watchingActivities) activity.onTabUpdate(lastUpdatedTabId);
@@ -341,7 +361,7 @@ public class BrowserService extends Service {
                         (n == 1 ? getString(R.string.notification_title_s) :
                         getString(R.string.notification_title_p, n) ))
                 .setContentText(getText(R.string.notification_content))
-                .setSmallIcon(R.drawable.ic_app_icon)
+                .setSmallIcon(R.drawable.ic_app_icon_noti)
                 .setContentIntent(pendingIntent)
                 .build();
     }

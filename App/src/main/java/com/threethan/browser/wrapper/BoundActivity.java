@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import com.threethan.browser.browser.BrowserService;
 
 public class BoundActivity extends Activity {
-    public BrowserService wService;
+    public @Nullable BrowserService wService;
     protected final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,

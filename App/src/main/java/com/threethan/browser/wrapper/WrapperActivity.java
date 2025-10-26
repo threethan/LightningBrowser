@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 
@@ -12,11 +13,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.threethan.browser.R;
+import com.threethan.browser.adapter.ActiveTabsAdapter;
 import com.threethan.browser.adapter.BookmarksAdapter;
 import com.threethan.browser.adapter.TabsAdapter;
 import com.threethan.browser.browser.BrowserActivity;
 import com.threethan.browser.browser.BrowserService;
 import com.threethan.browser.helper.BookmarkManager;
+import com.threethan.browser.helper.TabManager;
 import com.threethan.browser.lib.StringLib;
 
 import java.util.ArrayList;
@@ -52,21 +55,15 @@ public class WrapperActivity extends BoundActivity {
             }
         });
     }
-    private TabsAdapter tabsAdapter;
+    private TabsAdapter tabsAdapterActive;
+    private TabsAdapter tabsAdapterSuspended;
     private BookmarksAdapter bookmarksAdapter;
-    private View tabsSection;
+    private View tabsSectionActive;
+    private View tabsSectionSuspended;
     private View bookmarksSection;
     @Override
     protected void onBound() {
         BrowserService.watchingActivities.add(this);
-        // Init tabs list
-        tabsAdapter = new TabsAdapter(this);
-        tabsAdapter.setItems(wService.listWebViews());
-        RecyclerView tabs = findViewById(R.id.tabList);
-        tabs.setLayoutManager(new LinearLayoutManager(this));
-        tabs.setAdapter(tabsAdapter);
-        tabsSection = findViewById(R.id.tabsSection);
-        tabsSection.setVisibility(wService.listWebViews().isEmpty() ? View.GONE : View.VISIBLE);
 
         // Init bookmarks list
         bookmarkManager = new BookmarkManager(this);
@@ -78,20 +75,64 @@ public class WrapperActivity extends BoundActivity {
         bookmarksSection = findViewById(R.id.bookmarksSection);
         bookmarksSection.setVisibility(bookmarkManager.getBookmarks().isEmpty() ? View.GONE : View.VISIBLE);
 
+        // Init active tabs list
+        tabsAdapterActive = new ActiveTabsAdapter(this);
+        if (wService != null) tabsAdapterActive.setItems(new ArrayList<>(wService.listWebViews()));
+        RecyclerView activeTabs = findViewById(R.id.tabListActive);
+        activeTabs.setLayoutManager(new LinearLayoutManager(this));
+        activeTabs.setAdapter(tabsAdapterActive);
+        tabsSectionActive = findViewById(R.id.tabsSectionActive);
+
+        // Init suspended tabs list
+        TabManager tabManager = new TabManager(this);
+        boolean useSuspendedTabs = tabManager.shouldUseSuspendedTabs(this);
+
+        tabsAdapterSuspended = new TabsAdapter(this);
+
+        tabsAdapterSuspended.setItems(new ArrayList<>(tabManager.getSuspendedTabs()));
+
+        RecyclerView suspendedTabs = findViewById(R.id.tabListSuspended);
+        suspendedTabs.setLayoutManager(new LinearLayoutManager(this));
+        suspendedTabs.setAdapter(tabsAdapterSuspended);
+        tabsSectionSuspended = findViewById(R.id.tabsSectionSuspended);
+
+        findViewById(R.id.tabsInfoSuspendedChange).setOnClickListener(v
+                -> updateUseSuspendedTabs(tabManager, false)
+        );
+        findViewById(R.id.tabsInfoActiveDisable).setOnClickListener(v
+                -> updateUseSuspendedTabs(tabManager, true)
+        );
+
+        updateUseSuspendedTabs(tabManager, useSuspendedTabs);
     }
 
     @Override
     public void onTabUpdate(@Nullable String lastUpdateTabId) {
-        tabsAdapter.setItems(wService.listWebViews());
-        if (lastUpdateTabId != null) tabsAdapter.notifyItemChanged(lastUpdateTabId);
-        tabsSection.setVisibility(wService.listWebViews().isEmpty() ? View.GONE : View.VISIBLE);
+        if (wService == null) return;
+
+        tabsAdapterActive.setItems(wService.listWebViews());
+        if (lastUpdateTabId != null) tabsAdapterActive.notifyItemChanged(lastUpdateTabId);
+        else tabsAdapterActive.notifyAllChanged();
+        tabsSectionActive.setVisibility(
+                wService.listWebViews().isEmpty() ? View.GONE : View.VISIBLE
+        );
+
+        TabManager tabManager = new TabManager(this);
+        tabsAdapterSuspended.setItems(new ArrayList<>(tabManager.getSuspendedTabs()));
+        if (lastUpdateTabId != null) tabsAdapterSuspended.notifyItemChanged(lastUpdateTabId);
+        else tabsAdapterSuspended.notifyAllChanged();
+        tabsSectionSuspended.setVisibility(
+                !tabManager.shouldUseSuspendedTabs(this)
+                || tabManager.getSuspendedTabs().isEmpty() ? View.GONE : View.VISIBLE
+        );
     }
     @Override
     public void onBookmarkUpdate() {
         bookmarksAdapter.setItems(new ArrayList<>(bookmarkManager.getBookmarks()));
         bookmarksAdapter.notifyAllChanged();
-        tabsAdapter.notifyAllChanged();
+        tabsAdapterActive.notifyAllChanged();
         bookmarksSection.setVisibility(bookmarkManager.getBookmarks().isEmpty() ? View.GONE : View.VISIBLE);
+        onTabUpdate(null);
     }
 
     public void open(String urlOrTabId) {
@@ -102,5 +143,31 @@ public class WrapperActivity extends BoundActivity {
         intent.putExtra("isTab", true);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
+
+        new TabManager(this).removeSuspendedTab(urlOrTabId);
+    }
+    protected void updateUseSuspendedTabs(TabManager tabManager,
+                                          boolean useSuspendedTabs) {
+        // Update visibilities
+        findViewById(R.id.tabsInfoActive).setVisibility(useSuspendedTabs ? View.GONE : View.VISIBLE);
+        findViewById(R.id.tabsInfoSuspendedChange).setVisibility(useSuspendedTabs ? View.VISIBLE : View.GONE);
+
+        // Update TabManager setting
+        tabManager.setUseSuspendedTabs(useSuspendedTabs);
+
+        if (wService != null && useSuspendedTabs) {
+            // Move active tabs to suspended tabs
+            for (String tabId : wService.listWebViews()) {
+                String title = BrowserService.getTitle(tabId);
+                wService.setWebViewActive(tabId, false);
+                tabManager.addSuspendedTab(tabId, BrowserService.getUrl(tabId), title);
+                wService.killWebView(tabId);
+            }
+        }
+
+        new Handler().postDelayed(() -> {
+            // Notify changes
+            BrowserService.tabUpdate(null);
+        }, 250);
     }
 }

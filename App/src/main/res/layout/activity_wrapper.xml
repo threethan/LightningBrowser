@@ -24,6 +24,8 @@
             style="@style/Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingStart="0dp"
+            android:paddingEnd="10dp"
             android:text="@string/app_name" />
     </LinearLayout>
 
@@ -73,7 +75,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
-        tools:visibility="visible">
+        tools:visibility="visible"
+        android:layout_marginBottom="-100dp">
 
         <TextView
             style="@style/Subtitle"
@@ -85,40 +88,102 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/bookmarkList"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingBottom="100dp"/>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/tabsSection"
+        android:id="@+id/tabsSectionActive"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
-        tools:visibility="visible">
+        tools:visibility="visible"
+        android:layout_marginBottom="-100dp">
 
         <TextView
+            android:id="@+id/tabsTitleActive"
             style="@style/Subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="@string/tabs_title" />
+            android:text="@string/tabs_title_active" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/tabList"
+            android:id="@+id/tabListActive"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingBottom="100dp">
         </androidx.recyclerview.widget.RecyclerView>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tabsSectionSuspended"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_marginBottom="-100dp"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/tabsTitleSuspended"
+            style="@style/Subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/tabs_title_suspended" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tabListSuspended"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="100dp"
+            android:clipToPadding="false">
+        </androidx.recyclerview.widget.RecyclerView>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tabsInfoActive"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <TextView
             style="@style/SettingsText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
             android:alpha="0.5"
-            android:text="@string/tabs_info"
+            android:padding="3dp"
+            android:layout_marginEnd="50dp"
+            android:text="@string/tabs_info_active"
             android:textSize="12sp" />
 
+        <TextView
+            android:id="@+id/tabsInfoActiveDisable"
+            style="@style/SettingsText"
+            android:layout_marginStart="-50dp"
+            android:layout_width="150dp"
+            android:minWidth="100dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bkg_hover_button_small"
+            android:padding="3dp"
+            android:text="@string/tabs_info_active_disable"
+            android:textSize="12sp" />
     </LinearLayout>
+    <TextView
+        android:id="@+id/tabsInfoSuspendedChange"
+        style="@style/SettingsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/bkg_hover_button_small"
+        android:text="@string/tabs_info_suspended_change"
+        android:textSize="12sp"
+        android:visibility="gone"/>
 
 </LinearLayout>
+

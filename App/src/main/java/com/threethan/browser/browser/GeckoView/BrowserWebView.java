@@ -24,7 +24,7 @@ import java.util.Objects;
     A customized version of GeckoView which keeps media playing in the background.
  */
 @SuppressLint("ViewConstructor")
-public class BrowserWebView extends GeckoView {
+public class BrowserWebView extends ScrollHandlingGeckoView {
     // Delegates
     private final CustomNavigationDelegate navigationDelegate;
     private final CustomHistoryDelgate historyDelegate;
@@ -32,6 +32,7 @@ public class BrowserWebView extends GeckoView {
     private final CustomPromptDelegate promptDelegate;
     private final CustomContentDelegate contentDelegate;
     private final CustomPermissionDelegate permissionDelegate;
+    private final CustomMediaSessionDelegate mediaSessionDelegate;
 
     // Functions
     public void goBack() {
@@ -93,18 +94,17 @@ public class BrowserWebView extends GeckoView {
         promptDelegate = new CustomPromptDelegate(mActivity);
         contentDelegate = new CustomContentDelegate(mActivity);
         permissionDelegate = new CustomPermissionDelegate(mActivity);
+        mediaSessionDelegate = new CustomMediaSessionDelegate(mActivity);
 
-        CustomScrollDelegate scrollDelegate = new CustomScrollDelegate(mActivity);
-        navigationDelegate = new CustomNavigationDelegate(mActivity, scrollDelegate);
+        navigationDelegate = new CustomNavigationDelegate(mActivity);
 
         session.setHistoryDelegate(historyDelegate);
         session.setPermissionDelegate(permissionDelegate);
         session.setProgressDelegate(progressDelegate);
         session.setContentDelegate(contentDelegate);
         session.setPromptDelegate(promptDelegate);
-        session.setScrollDelegate(scrollDelegate);
         session.setNavigationDelegate(navigationDelegate);
-
+        session.setMediaSessionDelegate(mediaSessionDelegate);
         setSession(session);
         Objects.requireNonNull(mSession).getCompositorController().setClearColor(0xFF2A2A2E);
         coverUntilFirstPaint(0xFF2A2A2E);
@@ -116,6 +116,11 @@ public class BrowserWebView extends GeckoView {
         promptDelegate.mActivity = mActivity;
         contentDelegate.mActivity = mActivity;
         permissionDelegate.mActivity = mActivity;
+        mediaSessionDelegate.mActivity = mActivity;
+    }
+
+    public void setActive(boolean active) {
+        if (getSession() != null) getSession().setActive(active);
     }
 }
 
