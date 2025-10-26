@@ -45,7 +45,7 @@ public class BookmarkManager {
     public void addBookmark(String url, String title) {
         bookmarkTitlesByUrl.put(url, title);
         dataStoreEditor.putStringSet(KEY_BOOKMARK_LIST, bookmarkTitlesByUrl.keySet());
-        dataStoreEditor.putString(KEY_BOOKMARK_TITLE_PREFIX+url, url);
+        dataStoreEditor.putString(KEY_BOOKMARK_TITLE_PREFIX+url, title);
         Log.i("Bookmarks", "Bookmark Added for url "+url+" with title "+title);
         BrowserService.bookmarkUpdate();
     }
