@@ -22,4 +22,10 @@ public class CustomProgressDelegate implements GeckoSession.ProgressDelegate {
         GeckoSession.ProgressDelegate.super.onPageStop(session, success);
         if (mActivity != null) mActivity.stopLoading();
     }
+
+    @Override
+    public void onProgressChange(@NonNull GeckoSession session, int progress) {
+        GeckoSession.ProgressDelegate.super.onProgressChange(session, progress);
+        if (mActivity != null) mActivity.setLoadingProgress(progress);
+    }
 }
