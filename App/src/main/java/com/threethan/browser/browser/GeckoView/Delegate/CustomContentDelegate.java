@@ -4,8 +4,10 @@ import static android.content.Context.DOWNLOAD_SERVICE;
 
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
+import android.content.Context;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.webkit.URLUtil;
 
@@ -57,7 +59,17 @@ public class CustomContentDelegate implements GeckoSession.ContentDelegate {
 
         DownloadManager manager = (DownloadManager) mActivity.getSystemService(DOWNLOAD_SERVICE);
 
-        mActivity.registerReceiver(mActivity.wService.onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        if (mActivity.wService != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                mActivity.registerReceiver(mActivity.wService.onDownloadComplete,
+                        new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                        Context.RECEIVER_EXPORTED);
+            } else {
+                mActivity.registerReceiver(mActivity.wService.onDownloadComplete,
+                        new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            }
+        }
+
 
         final long id = manager.enqueue(request);
         BrowserService.downloadFilenameById.put(id, filename);

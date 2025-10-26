@@ -65,7 +65,7 @@ public class BrowserService extends Service {
     private static int currentTabIdIndex = 0;
     public static final String TAB_PREFIX = "$tab::";
     public final static String APK_DIR = RemotePackageUpdater.APK_FOLDER;
-    private static final boolean AUTOMATICALLY_OPEN_DOWNLOADS = false; // Causes issues
+    // Causes issues
 
     // Arbitrary ID for the persistent notification
     private final static int NOTIFICATION_ID = 42;
@@ -166,6 +166,8 @@ public class BrowserService extends Service {
     public static Map<Long, Activity> downloadActivityById = new ConcurrentHashMap<>();
     public BroadcastReceiver onDownloadComplete=new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
+            Log.i("BrowserService", "Download complete received");
+
             Long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
             String filename = downloadFilenameById.get(id);
             downloadFilenameById.remove(id);
@@ -197,29 +199,13 @@ public class BrowserService extends Service {
                 });
                 ((TextView) dialog.findViewById(R.id.downloadMessage)).setText(getString(R.string.web_apk_prompt_message_pre, filename));
             } else {
-                final File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                final File file = new File(path, filename);
-
-                if (AUTOMATICALLY_OPEN_DOWNLOADS)
-                    try {
-                        Uri fileURI = FileProvider.getUriForFile(getBaseContext(), getApplicationContext().getPackageName() + RemotePackageUpdater.PROVIDER, file);
-
-                        Intent openIntent = new Intent(Intent.ACTION_VIEW);
-                        openIntent.setDataAndType(fileURI, getContentResolver().getType(fileURI));
-                        openIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        openIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                        startActivity(openIntent);
-                    } catch (ActivityNotFoundException ignored) {
-                        Dialog.toast(getString(R.string.web_download_finished), filename, true);
-                    }
-                else
-                    Dialog.toast(getString(R.string.web_download_finished), filename, true);
+                Dialog.toast(getString(R.string.web_download_finished), filename, true);
             }
         }
     };
     private void copyToDownloads(File file) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Log.i("BrowserService", "Copying to downloads via MediaStore API");
             try {
                 android.content.ContentValues values = new android.content.ContentValues();
                 values.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, file.getName());
@@ -346,14 +332,19 @@ public class BrowserService extends Service {
             startForeground(NOTIFICATION_ID, getNotification());
         } catch (SecurityException e) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                boolean hasCamera = checkSelfPermission(Manifest.permission.CAMERA)
-                        == android.content.pm.PackageManager.PERMISSION_GRANTED;
-                boolean hasMicrophone = checkSelfPermission(Manifest.permission.RECORD_AUDIO)
-                        == android.content.pm.PackageManager.PERMISSION_GRANTED;
                 int serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    boolean hasCamera = checkSelfPermission(Manifest.permission.CAMERA)
+                            == android.content.pm.PackageManager.PERMISSION_GRANTED;
+                    boolean hasMicrophone = checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+                            == android.content.pm.PackageManager.PERMISSION_GRANTED;
+                    boolean hasLocation = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                            == android.content.pm.PackageManager.PERMISSION_GRANTED ||
+                            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                                    == android.content.pm.PackageManager.PERMISSION_GRANTED;
                     if (hasCamera) serviceType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
                     if (hasMicrophone) serviceType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+                    if (hasLocation) serviceType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
                 }
                 startForeground(NOTIFICATION_ID, getNotification(), serviceType);
             }
