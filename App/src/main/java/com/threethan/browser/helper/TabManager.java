@@ -8,10 +8,8 @@ import android.util.Log;
 
 import com.threethan.browser.browser.BrowserService;
 
-import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -61,12 +59,6 @@ public class TabManager {
         dataStoreEditor.removeString(KEY_TAB_TITLE_PREFIX +tabId);
         Log.i("SuspendedTabs", "Suspended Tab Removed from tabId "+tabId);
         BrowserService.bookmarkUpdate();
-    }
-
-    public void clearSuspendedTabs() {
-        tabTitlesByUid.clear();
-        dataStoreEditor.putStringSet(KEY_SUSPENDED_TAB_LIST, tabTitlesByUid.keySet());
-        BrowserService.tabUpdate(null);
     }
 
     public boolean shouldUseSuspendedTabs(Context context) {

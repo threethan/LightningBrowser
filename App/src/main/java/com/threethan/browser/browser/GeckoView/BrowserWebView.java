@@ -14,7 +14,6 @@ import com.threethan.browser.browser.GeckoView.Delegate.CustomPromptDelegate;
 
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoSessionSettings;
-import org.mozilla.geckoview.GeckoView;
 
 import java.util.Objects;
 

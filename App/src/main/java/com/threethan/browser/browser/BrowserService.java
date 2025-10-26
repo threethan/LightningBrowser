@@ -21,7 +21,6 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -105,7 +104,7 @@ public class BrowserService extends Service {
         BrowserWebView webView;
         final String tabId = activity.tabId;
         if (hasWebView(tabId)) {
-            webView = webViewByTabId.get(tabId);;
+            webView = webViewByTabId.get(tabId);
 
             assert webView != null;
             ViewGroup parent = (ViewGroup) webView.getParent();

@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -21,16 +20,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
-
-import org.mozilla.geckoview.GeckoView;
-import org.mozilla.geckoview.PanZoomController;
-import org.mozilla.geckoview.ScreenLength;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 // ADAPTED FROM https://gist.github.com/iyashamihsan/1ab5c1cfa47dea735ea46d8943a1bde4
 // Replaces d-pad navigation with an on-screen cursor that behaves like a mouse

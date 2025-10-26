@@ -2,7 +2,6 @@ package com.threethan.browser.adapter;
 
 import android.app.AlertDialog;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
