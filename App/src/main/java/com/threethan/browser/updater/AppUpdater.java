@@ -1,6 +1,7 @@
 package com.threethan.browser.updater;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -178,10 +179,29 @@ public abstract class AppUpdater extends RemotePackageUpdater {
     }
 
     /**
+     * Checks if the app was installed from Google Play
+     * @param packageName Package name of the app to check
+     * @return True if installed from Google Play
+     */
+    protected boolean isInstalledFromGooglePlay(String packageName) {
+        try {
+            String installerPackageName = activity.getInstallerPackageName(packageName);
+            return "com.android.vending".equals(installerPackageName) || "com.google.android.feedback".equals(installerPackageName);
+        } catch (IllegalArgumentException e) {
+            // Package not found or other error
+            return false;
+        }
+    }
+    /**
      * Checks the latest version of the app
      * @param consumer Called asynchronously with the latest version of the app
      */
     public void checkAppLatestVersion(Consumer<String> consumer) {
+        if (isInstalledFromGooglePlay(getAppPackageName())) {
+            Log.i(TAG, "App installed from Google Play, skipping update check.");
+            return;
+        }
+
         new Thread(() -> {
             try {
                 android.net.TrafficStats.setThreadStatsTag(5);
