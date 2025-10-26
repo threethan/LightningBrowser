@@ -12,7 +12,8 @@ public class PermissionManager {
     public static final String[] KNOWN_PERMISSIONS = new String[] {
             Manifest.permission.CAMERA,
             Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
     };
     private static DataStoreEditor dataStoreEditor;
     private static final String KEY_ORIGINS = "KEY_ORIGINS";

@@ -39,7 +39,9 @@ public class StringLib {
                 case Manifest.permission.CAMERA ->
                         permissionNames.add(context.getString(R.string.permission_camera));
                 case Manifest.permission.ACCESS_COARSE_LOCATION ->
-                        permissionNames.add(context.getString(R.string.permission_location));
+                        permissionNames.add(context.getString(R.string.permission_location_coarse));
+                case Manifest.permission.ACCESS_FINE_LOCATION ->
+                        permissionNames.add(context.getString(R.string.permission_location_fine));
                 default -> permissionNames.add(permission);
             }
         }

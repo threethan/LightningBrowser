@@ -11,11 +11,13 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.text.InputType;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -23,6 +25,7 @@ import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.DatePicker;
@@ -38,28 +41,34 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.threethan.browser.R;
+import com.threethan.browser.browser.BrowserActivity;
+import com.threethan.browser.helper.CustomDialog;
 
 import org.mozilla.geckoview.AllowOrDeny;
 import org.mozilla.geckoview.Autocomplete;
 import org.mozilla.geckoview.GeckoResult;
 import org.mozilla.geckoview.GeckoSession;
 
+import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Random;
 
 /** @noinspection DataFlowIssue*/
 public final class CustomPromptDelegate implements GeckoSession.PromptDelegate {
-    private static final String LOGTAG = "BasicGeckoViewPrompt";
+    private static final String TAG = "CustomPromptDelegate";
 
-    public Activity mActivity;
-    public int filePickerRequestCode = 1;
+    public BrowserActivity mActivity;
+    public int filePickerRequestCode = 10;
 
-    public CustomPromptDelegate(Activity mActivity) {
+    public CustomPromptDelegate(BrowserActivity mActivity) {
         this.mActivity = mActivity;
     }
 
@@ -71,7 +80,7 @@ public final class CustomPromptDelegate implements GeckoSession.PromptDelegate {
             return GeckoResult.fromValue(prompt.dismiss());
         }
         final AlertDialog.Builder builder =
-                new AlertDialog.Builder(activity)
+                new CustomDialog.Builder(activity)
                         .setTitle(prompt.title)
                         .setMessage(prompt.message)
                         .setPositiveButton(android.R.string.ok, /* onClickListener */ null);
@@ -108,12 +117,6 @@ public final class CustomPromptDelegate implements GeckoSession.PromptDelegate {
 
         createStandardDialog(builder, prompt, res).show();
         return res;
-    }
-
-    @Override
-    public GeckoResult<PromptResponse> onSharePrompt(
-            @NonNull final GeckoSession session, final SharePrompt prompt) {
-        return GeckoResult.fromValue(prompt.dismiss());
     }
 
     @NonNull
@@ -154,7 +157,7 @@ public final class CustomPromptDelegate implements GeckoSession.PromptDelegate {
     public GeckoResult<PromptResponse> onCreditCardSave(
             @NonNull GeckoSession session,
             @NonNull AutocompleteRequest<Autocomplete.CreditCardSaveOption> request) {
-        Log.i(LOGTAG, "onCreditCardSave " + request.options[0].value);
+        Log.i(TAG, "onCreditCardSave " + request.options[0].value);
         return null;
     }
 
@@ -163,7 +166,7 @@ public final class CustomPromptDelegate implements GeckoSession.PromptDelegate {
     public GeckoResult<PromptResponse> onLoginSave(
             @NonNull GeckoSession session,
             @NonNull AutocompleteRequest<Autocomplete.LoginSaveOption> request) {
-        Log.i(LOGTAG, "onLoginSave");
+        Log.i(TAG, "onLoginSave");
         return GeckoResult.fromValue(request.confirm(request.options[0]));
     }
 
@@ -207,6 +210,7 @@ public final class CustomPromptDelegate implements GeckoSession.PromptDelegate {
     }
 
     private int getViewPadding(final AlertDialog.Builder builder) {
+        //noinspection resource
         final TypedArray attr =
                 builder
                         .getContext()
@@ -449,6 +453,7 @@ public final class CustomPromptDelegate implements GeckoSession.PromptDelegate {
                                 mSeparator = new View(getContext());
                                 mSeparator.setLayoutParams(
                                         new ListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2, itemType));
+                                //noinspection resource
                                 final TypedArray attr =
                                         getContext().obtainStyledAttributes(new int[]{android.R.attr.listDivider});
                                 mSeparator.setBackgroundResource(attr.getResourceId(0, 0));
@@ -827,61 +832,94 @@ public final class CustomPromptDelegate implements GeckoSession.PromptDelegate {
 
     @Override
     public GeckoResult<PromptResponse> onFilePrompt(@NonNull GeckoSession session, @NonNull FilePrompt prompt) {
-        final Activity activity = mActivity;
-        if (activity == null) {
+        if (mActivity == null) {
             return GeckoResult.fromValue(prompt.dismiss());
         }
 
-        // Merge all given MIME types into one, using wildcard if needed.
-        String mimeType = null;
-        String mimeSubtype = null;
-        if (prompt.mimeTypes != null) {
-            for (final String rawType : prompt.mimeTypes) {
-                final String normalizedType = rawType.trim().toLowerCase(Locale.ROOT);
-                final int len = normalizedType.length();
-                int slash = normalizedType.indexOf('/');
-                if (slash < 0) {
-                    slash = len;
-                }
-                final String newType = normalizedType.substring(0, slash);
-                final String newSubtype = normalizedType.substring(Math.min(slash + 1, len));
-                if (mimeType == null) {
-                    mimeType = newType;
-                } else if (!mimeType.equals(newType)) {
-                    mimeType = "*";
-                }
-                if (mimeSubtype == null) {
-                    mimeSubtype = newSubtype;
-                } else if (!mimeSubtype.equals(newSubtype)) {
-                    mimeSubtype = "*";
-                }
-            }
-        }
-
         final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType(
-                (mimeType != null ? mimeType : "*") + '/' + (mimeSubtype != null ? mimeSubtype : "*"));
+        intent.setType("image/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
         if (prompt.type == FilePrompt.Type.MULTIPLE) {
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         }
         if ((prompt.mimeTypes != null ? prompt.mimeTypes.length : 0) > 0) {
-            intent.putExtra(Intent.EXTRA_MIME_TYPES, prompt.mimeTypes);
+            List<String> mimeTypes = new ArrayList<>();
+            for (String mimeType : prompt.mimeTypes) {
+                if (MimeTypeMap.getSingleton().hasMimeType(mimeType)) {
+                    mimeTypes.add(mimeType);
+                } else {
+                    String extension = mimeType.strip().replace(".", "");
+                    mimeTypes.add(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
+                }
+            }
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toArray(new String[0]));
         }
-
+        Log.i(TAG, "Launching file picker with mime types: "
+                + Arrays.toString(intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES)));
         GeckoResult<PromptResponse> res = new GeckoResult<>();
+        intent.addFlags(
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
 
         try {
-            activity.startActivityForResult(intent, filePickerRequestCode);
+            filePickerResult = res;
+            filePickerPromptRef = new WeakReference<>(prompt);
+            filePickerRequestCode = new Random().nextInt(0xFFFF);
+            mActivity.startActivityForResult(intent, filePickerRequestCode);
         } catch (final ActivityNotFoundException e) {
-            Log.e(LOGTAG, "Cannot launch activity", e);
+            Log.e(TAG, "Cannot launch activity", e);
             return GeckoResult.fromValue(prompt.dismiss());
         }
 
         return res;
     }
+    private GeckoResult<PromptResponse> filePickerResult;
+    private WeakReference<FilePrompt> filePickerPromptRef;
+    @SuppressLint("WrongConstant")
+    public void handleFilePickerResult(int resultCode, Intent data) {
+        /*
+            Intents such as content://media/picker_get_content/0/com.android.providers.media.photopicker/media/1000016741 work,
+            but intents such as content://com.android.providers.downloads.documents/document/3953 do not,
+            why?
+         */
 
+        Log.i(TAG, "Handling file picker result");
+        if (filePickerResult == null || filePickerPromptRef == null
+                || filePickerPromptRef.get() == null) {
+            return;
+        }
+        Log.i(TAG, "File picker result found, processing...");
+        FilePrompt prompt = filePickerPromptRef.get();
+        if (resultCode != Activity.RESULT_OK || data == null) {
+            filePickerResult.cancel();
+            filePickerResult = null;
+            filePickerPromptRef = null;
+        } else {
+            Log.i(TAG, "File picker returned data: " + data.getDataString());
+            List<Uri> uris = new ArrayList<>();
+            if (data.getData() != null) {
+                uris.add(data.getData());
+            } else if (data.getClipData() != null) {
+                ClipData clipData = data.getClipData();
+                for (int i = 0; i < clipData.getItemCount(); i++) {
+                    ClipData.Item item = clipData.getItemAt(i);
+                    if (item.getUri() != null) {
+                        uris.add(item.getUri());
+                    }
+                }
+            }
+
+            Log.i(TAG, "File picker selected " + uris.size() + " files." +
+                    (!uris.isEmpty() ? " First: " + uris.get(0).toString() : ""));
+
+            mActivity.runOnUiThread(() -> {
+                PromptResponse fResponse = prompt.confirm(mActivity, uris.toArray(new Uri[0]));
+                filePickerResult.complete(fResponse);
+            });
+        }
+        filePickerResult = null;
+    }
     @Override
     public GeckoResult<PromptResponse> onPopupPrompt(
             @NonNull final GeckoSession session, final PopupPrompt prompt) {

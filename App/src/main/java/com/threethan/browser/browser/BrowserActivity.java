@@ -1,7 +1,7 @@
 package com.threethan.browser.browser;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import com.threethan.browser.R;
 import com.threethan.browser.browser.GeckoView.BrowserWebView;
 import com.threethan.browser.browser.GeckoView.Delegate.CustomNavigationDelegate;
+import com.threethan.browser.browser.GeckoView.Delegate.CustomPromptDelegate;
 import com.threethan.browser.helper.BookmarkManager;
 import com.threethan.browser.helper.CustomDialog;
 import com.threethan.browser.helper.Dialog;
@@ -35,11 +36,6 @@ import com.threethan.browser.wrapper.BoundActivity;
 import com.threethan.browser.wrapper.EditTextWatched;
 
 import org.mozilla.geckoview.GeckoSession;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class BrowserActivity extends BoundActivity {
     private BrowserWebView w;
@@ -500,53 +496,47 @@ public class BrowserActivity extends BoundActivity {
     public void requestPermissions(String[] permissions, GeckoSession
             session, GeckoSession.PermissionDelegate.Callback callback) {
 
-        if (Arrays.asList(permissions).contains(Manifest.permission.ACCESS_FINE_LOCATION)) {
-            // Remove ACCESS_FINE_LOCATION as we only show COARSE_LOCATION to users
-            permissions = Stream.of(permissions)
-                    .filter(p -> !p.equals(Manifest.permission.ACCESS_FINE_LOCATION))
-                    .toArray(String[]::new);
-            if (permissions.length == 0) {
-                // If no permissions left, just grant
-                callback.grant();
-                return;
-            }
-        }
-
         String origin = "";
         if (session.getNavigationDelegate() instanceof CustomNavigationDelegate navDelegate) {
             origin = navDelegate.getOrigin();
         }
 
-        String[] androidPermissions = Stream.of(permissions)
-                .filter(p -> p.startsWith("android.permission.")).toArray(String[]::new);
-        boolean granted = true;
-        for (String permission : androidPermissions) {
-            if (!permissionManager.getPermission(origin, permission)
-                    || checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                granted = false;
+        boolean siteGranted = true;
+        for (String permission : permissions) {
+            if (!permissionManager.getPermission(origin, permission)) {
+                siteGranted = false;
+                break;
+            }
+        }
+        boolean androidGranted = true;
+        for (String permission : permissions) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                androidGranted = false;
                 break;
             }
         }
 
-        if (granted) {
+        if (siteGranted) {
             callback.grant();
+            if (!androidGranted) {
+                // Need to request Android permissions as well
+                requestPermissions(permissions, 1);
+            }
             return;
         }
-
         String finalOrigin = origin;
-        String[] finalPermissions = permissions;
         new CustomDialog.Builder(this)
                 .setTitle(R.string.permission_manage)
                 .setMessage(getString(R.string.permission_request_message, origin,
                         StringLib.buildPermissionNamesList(permissions, this)))
                 .setPositiveButton(R.string.permission_allow, (dialog, which) -> {
-                    for (String permission : androidPermissions) {
+                    for (String permission : permissions) {
                         permissionManager.setPermission(finalOrigin, permission, true);
                         if (checkSelfPermission(permission)
                                 != PackageManager.PERMISSION_GRANTED) {
                             pendingPermissionCallback = callback;
                             pendingPermissionOrigin = finalOrigin;
-                            requestPermissions(finalPermissions, 1);
+                            requestPermissions(permissions, 1);
                             return;
                         }
                     }
@@ -586,5 +576,16 @@ public class BrowserActivity extends BoundActivity {
         } catch (Exception e) {
             Log.e("BrowserActivity", "Error handling permission result", e);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (w.getPromptDelegate() instanceof CustomPromptDelegate promptDelegate) {
+            if (promptDelegate.filePickerRequestCode == requestCode) {
+                promptDelegate.handleFilePickerResult(resultCode, data);
+                return;
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

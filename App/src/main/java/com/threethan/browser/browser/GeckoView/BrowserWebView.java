@@ -121,5 +121,9 @@ public class BrowserWebView extends ScrollHandlingGeckoView {
     public void setActive(boolean active) {
         if (getSession() != null) getSession().setActive(active);
     }
+
+    public GeckoSession.PromptDelegate getPromptDelegate() {
+        return promptDelegate;
+    }
 }
 

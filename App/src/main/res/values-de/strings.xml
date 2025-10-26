@@ -143,6 +143,7 @@ werden ausgeführt</string>
     <string name="permission_request_message"><b>%1$s</b> fordert Zugriff auf <b>%2$s</b> an</string>
     <string name="permission_camera">📷&#160;Kamera</string>
     <string name="permission_microphone">🎙️&#160;Mikrofon</string>
-    <string name="permission_location">📍&#160;Standort</string>
+    <string name="permission_location_coarse">📍&#160;Grober&#160;Standort</string>
+    <string name="permission_location_fine">📍&#160;Genaur&#160;Standort</string>
     <string name="permission_manage_message"><b>%1$s</b> hat Zugriff auf <b>%2$s</b></string>
 </resources>
