@@ -131,5 +131,6 @@
     <string name="permission_request_message"><b>%1$s</b> 正在请求访问 <b>%2$s</b></string>
     <string name="permission_camera">📷&#160;相机</string>
     <string name="permission_microphone">🎙️&#160;麦克风</string>
+    <string name="permission_location">📍&#160;位置</string>
     <string name="permission_manage_message"><b>%1$s</b> 有权访问 <b>%2$s</b></string>
 </resources>

@@ -1,5 +1,13 @@
 package com.threethan.browser.lib;
 
+import android.Manifest;
+import android.content.Context;
+
+import com.threethan.browser.R;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class StringLib {
     public static boolean isValidUrl(String url) {
         if (url.startsWith("about:")) return true;
@@ -20,6 +28,22 @@ public class StringLib {
         String[] parts = url.split("/");
         if (parts.length < 3) return url;
         return parts[2];
+    }
+
+    public static String buildPermissionNamesList(String[] permissions, Context context) {
+        List<String> permissionNames = new ArrayList<>();
+        for (String permission : permissions) {
+            switch (permission) {
+                case Manifest.permission.RECORD_AUDIO ->
+                        permissionNames.add(context.getString(R.string.permission_microphone));
+                case Manifest.permission.CAMERA ->
+                        permissionNames.add(context.getString(R.string.permission_camera));
+                case Manifest.permission.ACCESS_COARSE_LOCATION ->
+                        permissionNames.add(context.getString(R.string.permission_location));
+                default -> permissionNames.add(permission);
+            }
+        }
+        return String.join(", ", permissionNames);
     }
 
     public static class ParititionedUrl {

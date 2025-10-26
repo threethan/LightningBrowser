@@ -22,7 +22,8 @@ public class CustomPermissionDelegate implements GeckoSession.PermissionDelegate
 
 
     @Override
-    public void onAndroidPermissionsRequest(@NonNull final GeckoSession session, final String[] permissions,
+    public void onAndroidPermissionsRequest(@NonNull final GeckoSession session,
+                                            final String[] permissions,
                                             @NonNull final Callback callback) {
         mActivity.requestPermissions(permissions, session, callback);
     }
@@ -46,7 +47,8 @@ public class CustomPermissionDelegate implements GeckoSession.PermissionDelegate
         if (video != null) neededPermissions.add(Manifest.permission.CAMERA);
         if (audio != null) neededPermissions.add(Manifest.permission.RECORD_AUDIO);
 
-        mActivity.requestPermissions(neededPermissions.toArray(new String[0]), session, new GeckoSession.PermissionDelegate.Callback() {
+        mActivity.requestPermissions(neededPermissions.toArray(new String[0]), session,
+                new GeckoSession.PermissionDelegate.Callback() {
             @Override
             public void grant() {
                 if (video != null)

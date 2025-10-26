@@ -34,7 +34,10 @@ import com.threethan.browser.wrapper.EditTextWatched;
 
 import org.mozilla.geckoview.GeckoSession;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class BrowserActivity extends BoundActivity {
     private BrowserWebView w;
@@ -165,17 +168,14 @@ public class BrowserActivity extends BoundActivity {
                     instanceof CustomNavigationDelegate navDelegate) {
                 origin = navDelegate.getOrigin();
             }
-            List<String> permissionNames = new java.util.ArrayList<>();
-            if (permissionManager.getPermission(origin, Manifest.permission.CAMERA))
-                permissionNames.add(getString(R.string.permission_camera));
-            if (permissionManager.getPermission(origin, Manifest.permission.RECORD_AUDIO))
-                permissionNames.add(getString(R.string.permission_microphone));
+
+            String[] permissions = permissionManager.getPermissionsForOrigin(origin);
 
             String finalOrigin = origin;
             new CustomDialog.Builder(this)
                     .setTitle(R.string.permission_manage)
                     .setMessage(getString(R.string.permission_manage_message, origin,
-                            String.join(", ", permissionNames)))
+                            StringLib.buildPermissionNamesList(permissions, this)))
                     .setPositiveButton(R.string.cancel, (dialog, which) -> dialog.dismiss())
                     .setNegativeButton(R.string.permission_revoke, (dialog, which) -> {
                         for (String permission : PermissionManager.KNOWN_PERMISSIONS) {
@@ -482,27 +482,28 @@ public class BrowserActivity extends BoundActivity {
 
     public void requestPermissions(String[] permissions, GeckoSession
             session, GeckoSession.PermissionDelegate.Callback callback) {
-        boolean requestingMicrophone = false;
-        boolean requestingCamera = false;
 
-        for (String permission : permissions) {
-            if (permission.equals(Manifest.permission.RECORD_AUDIO))
-                requestingMicrophone = true;
-            if (permission.equals(Manifest.permission.CAMERA))
-                requestingCamera = true;
+        if (Arrays.asList(permissions).contains(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            // Remove ACCESS_FINE_LOCATION as we only show COARSE_LOCATION to users
+            permissions = Stream.of(permissions)
+                    .filter(p -> !p.equals(Manifest.permission.ACCESS_FINE_LOCATION))
+                    .toArray(String[]::new);
+            if (permissions.length == 0) {
+                // If no permissions left, just grant
+                callback.grant();
+                return;
+            }
         }
-
-        List<String> permissionNames = new java.util.ArrayList<>();
-        if (requestingCamera) permissionNames.add(getString(R.string.permission_camera));
-        if (requestingMicrophone) permissionNames.add(getString(R.string.permission_microphone));
 
         String origin = "";
         if (session.getNavigationDelegate() instanceof CustomNavigationDelegate navDelegate) {
             origin = navDelegate.getOrigin();
         }
 
+        String[] androidPermissions = Stream.of(permissions)
+                .filter(p -> p.startsWith("android.permission.")).toArray(String[]::new);
         boolean granted = true;
-        for (String permission : permissions) {
+        for (String permission : androidPermissions) {
             if (!permissionManager.getPermission(origin, permission)
                     || checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 granted = false;
@@ -516,18 +517,19 @@ public class BrowserActivity extends BoundActivity {
         }
 
         String finalOrigin = origin;
+        String[] finalPermissions = permissions;
         new CustomDialog.Builder(this)
                 .setTitle(R.string.permission_manage)
                 .setMessage(getString(R.string.permission_request_message, origin,
-                        String.join(", ", permissionNames)))
+                        StringLib.buildPermissionNamesList(permissions, this)))
                 .setPositiveButton(R.string.permission_allow, (dialog, which) -> {
-                    for (String permission : permissions) {
+                    for (String permission : androidPermissions) {
                         permissionManager.setPermission(finalOrigin, permission, true);
                         if (checkSelfPermission(permission)
                                 != PackageManager.PERMISSION_GRANTED) {
                             pendingPermissionCallback = callback;
                             pendingPermissionOrigin = finalOrigin;
-                            requestPermissions(permissions, 1);
+                            requestPermissions(finalPermissions, 1);
                             return;
                         }
                     }

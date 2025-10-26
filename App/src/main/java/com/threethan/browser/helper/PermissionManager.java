@@ -11,7 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PermissionManager {
     public static final String[] KNOWN_PERMISSIONS = new String[] {
             Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_COARSE_LOCATION
     };
     private static DataStoreEditor dataStoreEditor;
     private static final String KEY_ORIGINS = "KEY_ORIGINS";
@@ -41,5 +42,15 @@ public class PermissionManager {
             }
         }
         return false;
+    }
+
+    public String[] getPermissionsForOrigin(String origin) {
+        Set<String> grantedPermissions = new HashSet<>();
+        for (String permission : KNOWN_PERMISSIONS) {
+            if (getPermission(origin, permission)) {
+                grantedPermissions.add(permission);
+            }
+        }
+        return grantedPermissions.toArray(new String[0]);
     }
 }
