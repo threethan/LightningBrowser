@@ -14,6 +14,14 @@ public class StringLib {
         else if (StringLib.isValidUrl("https://" + url)) return "https://" + url;
         else return StringLib.googleSearchForUrl(url);
     }
+
+    public static String getOrigin(String url) {
+        if (url == null || url.isEmpty()) return "";
+        String[] parts = url.split("/");
+        if (parts.length < 3) return url;
+        return parts[2];
+    }
+
     public static class ParititionedUrl {
         public final String prefix;
         public final String middle;

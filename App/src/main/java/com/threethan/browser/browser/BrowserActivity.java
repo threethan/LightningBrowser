@@ -1,6 +1,8 @@
 package com.threethan.browser.browser;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,12 +15,17 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.threethan.browser.R;
 import com.threethan.browser.browser.GeckoView.BrowserWebView;
+import com.threethan.browser.browser.GeckoView.Delegate.CustomNavigationDelegate;
 import com.threethan.browser.helper.BookmarkManager;
+import com.threethan.browser.helper.CustomDialog;
 import com.threethan.browser.helper.Dialog;
 import com.threethan.browser.helper.FaviconLoader;
 import com.threethan.browser.helper.Keyboard;
+import com.threethan.browser.helper.PermissionManager;
 import com.threethan.browser.helper.TabManager;
 import com.threethan.browser.lib.StringLib;
 import com.threethan.browser.updater.BrowserUpdater;
@@ -26,6 +33,8 @@ import com.threethan.browser.wrapper.BoundActivity;
 import com.threethan.browser.wrapper.EditTextWatched;
 
 import org.mozilla.geckoview.GeckoSession;
+
+import java.util.List;
 
 public class BrowserActivity extends BoundActivity {
     private BrowserWebView w;
@@ -40,11 +49,13 @@ public class BrowserActivity extends BoundActivity {
     ProgressBar loading;
     View bookmarkAdd;
     View bookmarkRem;
+    View permissionButton;
     protected final BookmarkManager bookmarkManager = new BookmarkManager(this);
     private boolean isEphemeral;
     private boolean isTab;
     private boolean isTopBarForciblyHidden;
     private final String DEFAULT_URL = "https://www.google.com/";
+    private final PermissionManager permissionManager = new PermissionManager(this);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,8 +93,8 @@ public class BrowserActivity extends BoundActivity {
                 } else tabId = BrowserService.getNewTabId();
             }
         }
-        if (tabId == null) tabId = BrowserService.TAB_PREFIX+"ext::"+currentUrl;
-        Log.v("Lightning Browser", "... with url " + currentUrl + (isTab ? ", is a tab":", not a tab") + ", assigned id "+tabId);
+        if (tabId == null) tabId = BrowserService.TAB_PREFIX + "ext::" + currentUrl;
+        Log.v("Lightning Browser", "... with url " + currentUrl + (isTab ? ", is a tab" : ", not a tab") + ", assigned id " + tabId);
 
         if (!isTab) {
             isTopBarForciblyHidden = true;
@@ -145,6 +156,40 @@ public class BrowserActivity extends BoundActivity {
             bookmarkManager.removeBookmark(currentUrl);
         });
 
+        // Permission Button
+        permissionButton = findViewById(R.id.permissionButton);
+        permissionButton.setOnClickListener((view) -> {
+            String origin = "";
+            if (w.getSession() != null
+                    && w.getSession().getNavigationDelegate()
+                    instanceof CustomNavigationDelegate navDelegate) {
+                origin = navDelegate.getOrigin();
+            }
+            List<String> permissionNames = new java.util.ArrayList<>();
+            if (permissionManager.getPermission(origin, Manifest.permission.CAMERA))
+                permissionNames.add(getString(R.string.permission_camera));
+            if (permissionManager.getPermission(origin, Manifest.permission.RECORD_AUDIO))
+                permissionNames.add(getString(R.string.permission_microphone));
+
+            String finalOrigin = origin;
+            new CustomDialog.Builder(this)
+                    .setTitle(R.string.permission_manage)
+                    .setMessage(getString(R.string.permission_manage_message, origin,
+                            String.join(", ", permissionNames)))
+                    .setPositiveButton(R.string.cancel, (dialog, which) -> dialog.dismiss())
+                    .setNegativeButton(R.string.permission_revoke, (dialog, which) -> {
+                        for (String permission : PermissionManager.KNOWN_PERMISSIONS) {
+                            permissionManager.setPermission(finalOrigin, permission, false);
+                        }
+                        permissionButton.setVisibility(View.GONE);
+                        // Refresh page to apply permission changes
+                        reload();
+                        dialog.dismiss();
+                    })
+                    .show();
+        });
+
+
         // Edit URL
         View urlLayout = findViewById(R.id.urlLayout);
         EditTextWatched urlEdit = findViewById(R.id.urlEdit);
@@ -159,7 +204,7 @@ public class BrowserActivity extends BoundActivity {
         View topBar = findViewById(R.id.topBar);
         View topBarEdit = findViewById(R.id.topBarEdit);
         urlLayout.setOnClickListener((view) -> {
-            topBar    .setVisibility(View.GONE);
+            topBar.setVisibility(View.GONE);
             topBarEdit.setVisibility(View.VISIBLE);
             urlEdit.setText(currentUrl);
             urlEdit.post(urlEdit::requestFocus);
@@ -198,6 +243,7 @@ public class BrowserActivity extends BoundActivity {
     private void updateButtonsAndUrl() {
         updateButtonsAndUrl(w.getUrl());
     }
+
     public void updateButtonsAndUrl(String url) {
         if (w == null) return;
         updateUrl(url);
@@ -216,6 +262,7 @@ public class BrowserActivity extends BoundActivity {
 
 
     public void setLoadingProgress(int progress) {
+        loading.setVisibility(View.VISIBLE);
         if (progress <= 0 || progress >= 100) {
             loading.setIndeterminate(true);
         } else {
@@ -223,13 +270,14 @@ public class BrowserActivity extends BoundActivity {
             loading.setProgress(progress);
         }
     }
+
     public void stopLoading() {
         loading.setIndeterminate(true);
         loading.setVisibility(View.GONE);
         // Update navigation
         back.setAlpha(1f);
         forward.setAlpha(1f);
-        back.setVisibility(w.canGoBack()       && !w.clearQueued ? View.VISIBLE : View.GONE);
+        back.setVisibility(w.canGoBack() && !w.clearQueued ? View.VISIBLE : View.GONE);
         forward.setVisibility(w.canGoForward() && !w.clearQueued ? View.VISIBLE : View.GONE);
     }
 
@@ -237,7 +285,7 @@ public class BrowserActivity extends BoundActivity {
         if (w != null) {
             if (w.getLayoutParams() instanceof FrameLayout.LayoutParams flp) {
                 flp.topMargin = top;
-                flp.bottomMargin = top > 0 ? (-getTopLayoutHeight()+top) : 0;
+                flp.bottomMargin = top > 0 ? (-getTopLayoutHeight() + top) : 0;
                 w.setLayoutParams(flp);
             }
         } else {
@@ -252,6 +300,7 @@ public class BrowserActivity extends BoundActivity {
 
         setGeckoViewTop(getTopLayoutHeight());
     }
+
     public void hideTopBar() {
         findViewById(R.id.topBar).setVisibility(View.GONE);
         findViewById(R.id.topBarEdit).setVisibility(View.GONE);
@@ -284,8 +333,11 @@ public class BrowserActivity extends BoundActivity {
         }
 
         FaviconLoader.loadFavicon(this, currentUrl, favicon::setImageDrawable);
+        permissionButton.setVisibility(permissionManager.hasPermissionsForOrigin(StringLib.getOrigin(url)) ? View.VISIBLE : View.GONE);
+        startLoading();
     }
 
+    @SuppressLint("GestureBackNavigation")
     @Override
     public void onBackPressed() {
         if (isTopBarForciblyHidden) {
@@ -299,8 +351,7 @@ public class BrowserActivity extends BoundActivity {
             if (w.canGoBack()) {
                 w.goBack();
                 updateButtonsAndUrl();
-            }
-            else finish();
+            } else finish();
         }
     }
 
@@ -327,6 +378,7 @@ public class BrowserActivity extends BoundActivity {
         wService.removeActivity(this);
         super.onDestroy();
     }
+
     public void loadUrl(String url) {
         if (url == null) {
             Log.w("Lightning Browser", "Tried to load null URL");
@@ -369,6 +421,7 @@ public class BrowserActivity extends BoundActivity {
         super.onResume();
     }
 
+    @SuppressLint("GestureBackNavigation")
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) onBackPressed();
@@ -376,6 +429,7 @@ public class BrowserActivity extends BoundActivity {
     }
 
     private float accumulatedScrollY = 0;
+
     public boolean handleScrollChanged(int deltaX, int deltaY) {
         if (isTopBarForciblyHidden || isFullScreen()) return false;
 
@@ -384,7 +438,7 @@ public class BrowserActivity extends BoundActivity {
 
         float topLayoutHeight = getTopLayoutHeight();
 
-        if (accumulatedScrollY > topLayoutHeight*2) accumulatedScrollY = topLayoutHeight*2;
+        if (accumulatedScrollY > topLayoutHeight * 2) accumulatedScrollY = topLayoutHeight * 2;
         if (accumulatedScrollY < -topLayoutHeight) accumulatedScrollY = -topLayoutHeight;
 
         float prevTop = -accumulatedScrollY + topLayoutHeight;
@@ -412,6 +466,7 @@ public class BrowserActivity extends BoundActivity {
     }
 
     GeckoSession fullScreenSession = null;
+
     protected boolean isFullScreen() {
         return fullScreenSession != null;
     }
@@ -420,5 +475,97 @@ public class BrowserActivity extends BoundActivity {
         this.fullScreenSession = geckoSession;
         if (isFullScreen()) hideTopBar();
         else showTopBar();
+    }
+
+    private GeckoSession.PermissionDelegate.Callback pendingPermissionCallback = null;
+    private String pendingPermissionOrigin = null;
+
+    public void requestPermissions(String[] permissions, GeckoSession
+            session, GeckoSession.PermissionDelegate.Callback callback) {
+        boolean requestingMicrophone = false;
+        boolean requestingCamera = false;
+
+        for (String permission : permissions) {
+            if (permission.equals(Manifest.permission.RECORD_AUDIO))
+                requestingMicrophone = true;
+            if (permission.equals(Manifest.permission.CAMERA))
+                requestingCamera = true;
+        }
+
+        List<String> permissionNames = new java.util.ArrayList<>();
+        if (requestingCamera) permissionNames.add(getString(R.string.permission_camera));
+        if (requestingMicrophone) permissionNames.add(getString(R.string.permission_microphone));
+
+        String origin = "";
+        if (session.getNavigationDelegate() instanceof CustomNavigationDelegate navDelegate) {
+            origin = navDelegate.getOrigin();
+        }
+
+        boolean granted = true;
+        for (String permission : permissions) {
+            if (!permissionManager.getPermission(origin, permission)
+                    || checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                granted = false;
+                break;
+            }
+        }
+
+        if (granted) {
+            callback.grant();
+            return;
+        }
+
+        String finalOrigin = origin;
+        new CustomDialog.Builder(this)
+                .setTitle(R.string.permission_manage)
+                .setMessage(getString(R.string.permission_request_message, origin,
+                        String.join(", ", permissionNames)))
+                .setPositiveButton(R.string.permission_allow, (dialog, which) -> {
+                    for (String permission : permissions) {
+                        permissionManager.setPermission(finalOrigin, permission, true);
+                        if (checkSelfPermission(permission)
+                                != PackageManager.PERMISSION_GRANTED) {
+                            pendingPermissionCallback = callback;
+                            pendingPermissionOrigin = finalOrigin;
+                            requestPermissions(permissions, 1);
+                            return;
+                        }
+                    }
+                    permissionButton.setVisibility(View.VISIBLE);
+                    callback.grant();
+                })
+                .setNegativeButton(R.string.permission_deny, (dialog, which)
+                        -> callback.reject())
+                .show();
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        try {
+            if (pendingPermissionCallback != null) {
+                boolean allGranted = true;
+                for (int result : grantResults) {
+                    if (result != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        allGranted = false;
+                        break;
+                    }
+                }
+                if (allGranted) {
+                    for (String permission : permissions)
+                        permissionManager.setPermission(pendingPermissionOrigin, permission, true);
+                    pendingPermissionCallback.grant();
+                    permissionButton.setVisibility(View.VISIBLE);
+                    if (wService != null) wService.restartForeground();
+                } else {
+                    pendingPermissionCallback.reject();
+                }
+                pendingPermissionCallback = null;
+            }
+        } catch (Exception e) {
+            Log.e("BrowserActivity", "Error handling permission result", e);
+        }
     }
 }

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.threethan.browser.browser.BrowserActivity;
+import com.threethan.browser.lib.StringLib;
 
 import org.mozilla.geckoview.AllowOrDeny;
 import org.mozilla.geckoview.GeckoResult;
@@ -58,5 +59,9 @@ public class CustomNavigationDelegate implements GeckoSession.NavigationDelegate
         mActivity.showTopBar();
 
         return GeckoSession.NavigationDelegate.super.onLoadRequest(session, request);
+    }
+
+    public String getOrigin() {
+        return StringLib.getOrigin(currentUrl);
     }
 }

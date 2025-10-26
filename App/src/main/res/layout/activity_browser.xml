@@ -4,7 +4,8 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:id="@+id/topBar"
@@ -61,6 +62,21 @@
             android:tooltipText="@string/web_reload"
             tools:ignore="UnusedAttribute" />
 
+
+        <ImageButton
+            android:id="@+id/permissionButton"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bkg_button_web"
+            android:src="@drawable/web_permissions"
+            android:tooltipText="@string/permission_manage"
+            tools:ignore="UnusedAttribute"
+            android:visibility="visible"/>
+
         <LinearLayout
             android:id="@+id/urlLayout"
             android:layout_width="0dp"
@@ -82,7 +98,6 @@
                 android:scaleType="fitXY"
                 android:background="@drawable/bkg_favicon"
                 android:src="@drawable/web_no_favicon" />
-
             <TextView
                 android:id="@+id/urlPre"
                 android:layout_width="wrap_content"
@@ -161,7 +176,6 @@
             android:src="@drawable/web_extensions"
             android:tooltipText="@string/extension_prompt_title"
             tools:ignore="UnusedAttribute" />
-
         <ImageButton
             android:id="@+id/kill"
             android:layout_width="39dp"
@@ -209,7 +223,7 @@
             android:max="100"
             android:progressBackgroundTint="#E4E4E4"
             android:progressTint="#E4E4E4"
-            android:visibility="visible" />
+            android:visibility="invisible" />
     </FrameLayout>
     <LinearLayout
         android:id="@+id/topBarEdit"

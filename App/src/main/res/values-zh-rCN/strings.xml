@@ -124,4 +124,12 @@
     <string name="web_rename">更改标签</string>
     <string name="enabled">已启用</string>
     <string name="disabled">已禁用</string>
+    <string name="permission_allow">允许</string>
+    <string name="permission_deny">否定</string>
+    <string name="permission_revoke">撤销</string>
+    <string name="permission_manage">管理访问权限</string>
+    <string name="permission_request_message"><b>%1$s</b> 正在请求访问 <b>%2$s</b></string>
+    <string name="permission_camera">📷&#160;相机</string>
+    <string name="permission_microphone">🎙️&#160;麦克风</string>
+    <string name="permission_manage_message"><b>%1$s</b> 有权访问 <b>%2$s</b></string>
 </resources>

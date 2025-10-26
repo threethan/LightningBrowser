@@ -142,4 +142,12 @@
     <string name="web_rename">Rename</string>
     <string name="enabled">enabled</string>
     <string name="disabled">disabled</string>
+    <string name="permission_allow">Allow</string>
+    <string name="permission_deny">Deny</string>
+    <string name="permission_revoke">Revoke</string>
+    <string name="permission_manage">Manage Permissions</string>
+    <string name="permission_request_message"><b>%1$s</b> is requesting access to your <b>%2$s</b></string>
+    <string name="permission_camera">📷&#160;Camera</string>
+    <string name="permission_microphone">🎙️&#160;Microphone</string>
+    <string name="permission_manage_message"><b>%1$s</b> has access to your <b>%2$s</b></string>
 </resources>

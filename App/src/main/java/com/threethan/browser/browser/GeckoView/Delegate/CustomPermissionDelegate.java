@@ -1,21 +1,22 @@
 package com.threethan.browser.browser.GeckoView.Delegate;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
+
+import com.threethan.browser.browser.BrowserActivity;
 
 import org.mozilla.geckoview.GeckoResult;
 import org.mozilla.geckoview.GeckoSession;
 
-public class CustomPermissionDelegate implements GeckoSession.PermissionDelegate {
-    public int androidPermissionRequestCode = 1;
-    public Activity mActivity;
+import java.util.ArrayList;
+import java.util.List;
 
-    public CustomPermissionDelegate(Activity mActivity) {
+public class CustomPermissionDelegate implements GeckoSession.PermissionDelegate {
+    public BrowserActivity mActivity;
+
+    public CustomPermissionDelegate(BrowserActivity mActivity) {
         this.mActivity = mActivity;
     }
 
@@ -23,9 +24,7 @@ public class CustomPermissionDelegate implements GeckoSession.PermissionDelegate
     @Override
     public void onAndroidPermissionsRequest(@NonNull final GeckoSession session, final String[] permissions,
                                             @NonNull final Callback callback) {
-        // requestPermissions was introduced in API 23.
-        mActivity.requestPermissions(permissions, androidPermissionRequestCode);
-        callback.grant();
+        mActivity.requestPermissions(permissions, session, callback);
     }
 
     @Nullable
@@ -43,22 +42,26 @@ public class CustomPermissionDelegate implements GeckoSession.PermissionDelegate
         // and if we've reached here and we don't have permissions then that means that the user
         // denied them.
 
-        if ((audio != null
-                && ContextCompat.checkSelfPermission(mActivity,
-                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
-                || (video != null
-                && ContextCompat.checkSelfPermission(mActivity,
-                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
-            callback.reject();
-            return;
-        }
+        List<String> neededPermissions = new ArrayList<>();
+        if (video != null) neededPermissions.add(Manifest.permission.CAMERA);
+        if (audio != null) neededPermissions.add(Manifest.permission.RECORD_AUDIO);
 
-        if (video != null)
-            for (MediaSource source : video)
-                callback.grant(source, null);
-        if (audio != null)
-            for (MediaSource source : audio)
-                callback.grant(null, source);
+        mActivity.requestPermissions(neededPermissions.toArray(new String[0]), session, new GeckoSession.PermissionDelegate.Callback() {
+            @Override
+            public void grant() {
+                if (video != null)
+                    for (MediaSource source : video)
+                        callback.grant(source, null);
+                if (audio != null)
+                    for (MediaSource source : audio)
+                        callback.grant(null, source);
+            }
+
+            @Override
+            public void reject() {
+                callback.reject();
+            }
+        });
     }
 }
 

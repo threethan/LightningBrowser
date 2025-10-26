@@ -1,10 +1,12 @@
 package com.threethan.browser.browser;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -13,11 +15,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +55,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BrowserService extends Service {
+    private static final String CHANNEL_ID = "browser_service_channel";
     private final IBinder binder = new LocalBinder();
     private final static Map<String, BrowserWebView> webViewByTabId = new ConcurrentHashMap<>();
     private final static Map<String, Activity> activityByTabId = new ConcurrentHashMap<>();
@@ -214,11 +219,36 @@ public class BrowserService extends Service {
         }
     };
     private void copyToDownloads(File file) {
-        // Copy to downloads
-        // Original file will be deleted next time the updater is called
-        File dlPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File dlFile = new File(dlPath, file.getName());
-        FileLib.copy(file, dlFile);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                android.content.ContentValues values = new android.content.ContentValues();
+                values.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, file.getName());
+                values.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "*/*");
+                values.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+                Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+
+                if (uri != null) {
+                    try (java.io.OutputStream out = getContentResolver().openOutputStream(uri);
+                         java.io.InputStream in = new java.io.FileInputStream(file)) {
+                        if (out == null) return;
+                        byte[] buffer = new byte[8192];
+                        int bytesRead;
+                        while ((bytesRead = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, bytesRead);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("BrowserService", "Failed to copy to downloads", e);
+            }
+        } else {
+            // Copy to downloads
+            // Original file will be deleted next time the updater is called
+            File dlPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File dlFile = new File(dlPath, file.getName());
+            FileLib.copy(file, dlFile);
+        }
     }
     private void promptInstallApk(File file) {
         if(!file.exists()) return;
@@ -307,8 +337,27 @@ public class BrowserService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(NOTIFICATION_ID, getNotification());
+        restartForeground();
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    public void restartForeground() {
+        try {
+            startForeground(NOTIFICATION_ID, getNotification());
+        } catch (SecurityException e) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                boolean hasCamera = checkSelfPermission(Manifest.permission.CAMERA)
+                        == android.content.pm.PackageManager.PERMISSION_GRANTED;
+                boolean hasMicrophone = checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+                        == android.content.pm.PackageManager.PERMISSION_GRANTED;
+                int serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (hasCamera) serviceType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
+                    if (hasMicrophone) serviceType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+                }
+                startForeground(NOTIFICATION_ID, getNotification(), serviceType);
+            }
+        }
     }
 
     private static final int BIND_FLAGS = BIND_ABOVE_CLIENT | BIND_IMPORTANT;
@@ -355,13 +404,24 @@ public class BrowserService extends Service {
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_MUTABLE);
         final int n = webViewByTabId.size();
-        return new Notification.Builder(this)
+        Notification.Builder builder = new Notification.Builder(this)
                 .setContentTitle( n == 0 ? getString(R.string.notification_title_n) :
                         (n == 1 ? getString(R.string.notification_title_s) :
                         getString(R.string.notification_title_p, n) ))
                 .setContentText(getText(R.string.notification_content))
                 .setSmallIcon(R.drawable.ic_app_icon_noti)
-                .setContentIntent(pendingIntent)
-                .build();
+                .setContentIntent(pendingIntent);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Persistent Notification - Please Hide",
+                    NotificationManager.IMPORTANCE_MIN
+            );
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+            builder.setChannelId(CHANNEL_ID);
+        }
+        return builder.build();
     }
 }
