@@ -1,7 +1,7 @@
 # LightningBrowser
 A powerful Gecko-based browser for Android TV and VR. 
 
-*(Previously part of [LightningLauncher](https://github.com/threethan/LightningLauncher))*
+<img width="1024" height="500" alt="lb_promo" src="https://github.com/user-attachments/assets/8ffbf6f8-871b-4375-ae7b-c376002d823e" />
 
 ## Features
 - Dynamic cursor that allows for easy navigation with an Android TV remote control
